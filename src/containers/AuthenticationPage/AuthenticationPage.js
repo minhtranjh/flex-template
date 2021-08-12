@@ -159,7 +159,7 @@ export class AuthenticationPageComponent extends Component {
       {
         text: (
           <h1 className={css.tab}>
-            <FormattedMessage id="AuthenticationPage.loginLinkText" />
+            <FormattedMessage id="AuthenticationPage.loginLinkText" values={{marketplaceTitle : "Test"}}  />
           </h1>
         ),
         selected: isLogin,

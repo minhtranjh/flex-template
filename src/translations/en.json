@@ -23,7 +23,7 @@
   "AuthenticationPage.fixEmail": "Whoops, typo in your email? {fixEmailLink}.",
   "AuthenticationPage.fixEmailLinkText": "Fix it",
   "AuthenticationPage.loginFailed": "The email and password you entered did not match our records. Please double-check and try again.",
-  "AuthenticationPage.loginLinkText": "Login",
+  "AuthenticationPage.loginLinkText": "Login to {marketplaceTitle}",
   "AuthenticationPage.loginWithFacebook": "Log in with Facebook",
   "AuthenticationPage.loginWithGoogle": "Log in with Google",
   "AuthenticationPage.or": "or",
