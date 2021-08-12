@@ -52,7 +52,6 @@ class GeocoderGoogleMaps {
           },
         }
       : {};
-
     return getPlacePredictions(search, this.getSessionToken(), limitCountriesMaybe).then(
       results => {
         return {
