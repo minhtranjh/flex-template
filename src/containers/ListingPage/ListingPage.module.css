@@ -421,7 +421,39 @@
     margin-bottom: 52px;
   }
 }
+.capacityTitle{
+   /* Font */
+   @apply --marketplaceH3FontStyles;
+   color: var(--matterColorAnti);
+ 
+   margin-top: 0;
+   margin-bottom: 16px;
+   @media (--viewportMedium) {
+     margin-top: 0;
+     margin-bottom: 12px;
+   }
+}
+.capacity{
+  margin-top: 0;
+  margin-bottom: 0;
 
+  /* Preserve newlines, but collapse other whitespace */
+  white-space: pre-line;
+
+  @media (--viewportMedium) {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+.sectionCapacity{
+  padding: 0 24px;
+  margin-bottom: 32px;
+
+  @media (--viewportMedium) {
+    padding: 0;
+    margin-bottom: 52px;
+  }
+}
 .featuresTitle {
   /* Font */
   @apply --marketplaceH3FontStyles;

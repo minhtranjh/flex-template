@@ -52,6 +52,8 @@ import SectionHostMaybe from './SectionHostMaybe';
 import SectionRulesMaybe from './SectionRulesMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
 import css from './ListingPage.module.css';
+import SectionViewMaybe from './SectionViewMaybe';
+import SectionCapacityMaybe from './SectionCapacityMaybe';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -203,9 +205,9 @@ export class ListingPageComponent extends Component {
     const isDraftVariant = rawParams.variant === LISTING_PAGE_DRAFT_VARIANT;
     const currentListing =
       isPendingApprovalVariant || isDraftVariant
-        ? ensureOwnListing(getOwnListing(listingId))
+        ? ensureOwnListing(getOwnListing(listingId)) //??
         : ensureListing(getListing(listingId));
-
+      
     const listingSlug = rawParams.slug || createSlug(currentListing.attributes.title || '');
     const params = { slug: listingSlug, ...rawParams };
 
@@ -378,6 +380,7 @@ export class ListingPageComponent extends Component {
 
     const amenityOptions = findOptionsForSelectFilter('amenities', filterConfig);
     const categoryOptions = findOptionsForSelectFilter('category', filterConfig);
+    const capacityOptions = findOptionsForSelectFilter("capacity",filterConfig)
     const category =
       publicData && publicData.category ? (
         <span>
@@ -385,7 +388,7 @@ export class ListingPageComponent extends Component {
           <span className={css.separator}>•</span>
         </span>
       ) : null;
-
+    const viewOptions = findOptionsForSelectFilter("view",filterConfig);
     return (
       <Page
         title={schemaTitle}
@@ -437,6 +440,8 @@ export class ListingPageComponent extends Component {
                   <SectionDescriptionMaybe description={description} />
                   <SectionFeaturesMaybe options={amenityOptions} publicData={publicData} />
                   <SectionRulesMaybe publicData={publicData} />
+                  <SectionViewMaybe publicData={publicData} options={viewOptions}/>
+                  <SectionCapacityMaybe publicData={publicData} options={capacityOptions}/>
                   <SectionMapMaybe
                     geolocation={geolocation}
                     publicData={publicData}
