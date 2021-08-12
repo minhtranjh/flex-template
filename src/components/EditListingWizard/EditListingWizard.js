@@ -26,7 +26,6 @@ import EditListingWizardTab, {
   LOCATION,
   PRICING,
   PHOTOS,
-  CAPACITY,
 } from './EditListingWizardTab';
 import css from './EditListingWizard.module.css';
 
@@ -42,7 +41,6 @@ export const TABS = [
   FEATURES,
   POLICY,
   LOCATION,
-  CAPACITY,
   PRICING,
   ...availabilityMaybe,
   PHOTOS,
@@ -70,8 +68,6 @@ const tabLabel = (intl, tab) => {
     key = 'EditListingWizard.tabLabelAvailability';
   } else if (tab === PHOTOS) {
     key = 'EditListingWizard.tabLabelPhotos';
-  } else if (tab === CAPACITY) {
-    key = 'EditListingWizard.tabLabelCapacity';
   }
 
   return intl.formatMessage({ id: key });
@@ -101,8 +97,6 @@ const tabCompleted = (tab, listing) => {
       return !!(description && title);
     case FEATURES:
       return !!(publicData && publicData.amenities);
-    case CAPACITY:
-      return !!(publicData && publicData.capacity);
     case POLICY:
       return !!(publicData && typeof publicData.rules !== 'undefined');
     case LOCATION:
@@ -292,6 +286,7 @@ class EditListingWizard extends Component {
     const classes = classNames(rootClasses, className);
     const currentListing = ensureListing(listing);
     const tabsStatus = tabsActive(isNewListingFlow, currentListing);
+
     // If selectedTab is not active, redirect to the beginning of wizard
     if (!tabsStatus[selectedTab]) {
       const currentTabIndex = TABS.indexOf(selectedTab);
@@ -370,6 +365,7 @@ class EditListingWizard extends Component {
     if (returnedNormallyFromStripe && stripeConnected && !requirementsMissing) {
       return <NamedRedirect name="EditListingPage" params={pathParams} />;
     }
+
     return (
       <div className={classes}>
         <Tabs
