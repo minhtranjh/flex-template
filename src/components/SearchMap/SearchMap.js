@@ -20,6 +20,7 @@ import SearchMapWithGoogleMaps, {
 } from './SearchMapWithGoogleMaps';
 import ReusableMapContainer from './ReusableMapContainer';
 import css from './SearchMap.module.css';
+import Button from '../Button/Button';
 
 const REUSABLE_MAP_HIDDEN_HANDLE = 'reusableMapHidden';
 
@@ -121,6 +122,8 @@ export class SearchMapComponent extends Component {
       bounds,
       center,
       location,
+      onToggleShowingMap,
+      toggleShowingMapButtonMessage,
       listings: originalListings,
       onMapMoveEnd,
       zoom,
@@ -173,6 +176,9 @@ export class SearchMapComponent extends Component {
         onReattach={forceUpdateHandler}
         messages={messages}
       >
+        <Button onClick={onToggleShowingMap} className={css.showHideMapBtn}>
+          {toggleShowingMapButtonMessage}
+        </Button>
         <SearchMapWithGoogleMaps
           id={id}
           className={classes}

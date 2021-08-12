@@ -764,6 +764,8 @@
   "SearchMapInfoCard.noImage": "No image",
   "SearchPage.schemaDescription": "Showing search results",
   "SearchPage.schemaMapSearch": "map search",
+  "SearchPage.showingMapButtonText": "Show",
+  "SearchPage.hidingMapButtonText": "Hide",
   "SearchPage.schemaTitle": "Search results for {searchAddress} | {siteTitle}",
   "SearchPage.searchError": "Search failed. Please try again.",
   "SearchResultsPanel.nextPage": "Next page",

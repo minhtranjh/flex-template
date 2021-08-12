@@ -17,6 +17,9 @@
   }
 }
 
+.mapBox{
+  position:relative;
+}
 .container {
   /* Layout */
   width: 100%;
@@ -29,13 +32,14 @@
     min-height: calc(100vh - var(--topbarHeightDesktop));
   }
 }
-
+.container.mapHided{
+  display:unset;
+}
 .searchResultContainer {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   padding: 2px 0 0 0;
-
   @media (--viewportMedium) {
     padding: 18px 0 0 0;
     /**
@@ -148,11 +152,14 @@
   width: 100%;
   height: 100%;
 }
+.container.mapHided .map{
+  transform: translateX(100%);
 
+}
 .map {
   width: 100vw;
   height: 100vh;
-
+  /* transform: translateX(100%); */
   @media (--viewportMedium) {
     /* Map is fixed so that it doesn't scroll along search results */
     position: fixed;

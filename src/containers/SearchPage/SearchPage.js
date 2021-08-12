@@ -14,7 +14,7 @@ import { parse, stringify } from '../../util/urlHelpers';
 import { propTypes } from '../../util/types';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/UI.duck';
-import { SearchMap, ModalInMobile, Page } from '../../components';
+import { SearchMap, ModalInMobile, Page, Button } from '../../components';
 import { TopbarContainer } from '../../containers';
 
 import { searchMapListings, setActiveListing } from './SearchPage.duck';
@@ -37,6 +37,7 @@ export class SearchPageComponent extends Component {
     this.state = {
       isSearchMapOpenOnMobile: props.tab === 'map',
       isMobileModalOpen: false,
+      isSearchMapHiding: false,
     };
 
     this.searchMapListingsInProgress = false;
@@ -44,6 +45,7 @@ export class SearchPageComponent extends Component {
     this.onMapMoveEnd = debounce(this.onMapMoveEnd.bind(this), SEARCH_WITH_MAP_DEBOUNCE);
     this.onOpenMobileModal = this.onOpenMobileModal.bind(this);
     this.onCloseMobileModal = this.onCloseMobileModal.bind(this);
+    this.onToggleShowingMap = this.onToggleShowingMap.bind(this);
   }
 
   // Callback to determine if new search is needed
@@ -98,7 +100,9 @@ export class SearchPageComponent extends Component {
   onCloseMobileModal() {
     this.setState({ isMobileModalOpen: false });
   }
-
+  onToggleShowingMap() {
+    this.setState({ isSearchMapHiding: !this.state.isSearchMapHiding });
+  }
   render() {
     const {
       intl,
@@ -140,7 +144,7 @@ export class SearchPageComponent extends Component {
     const isMobileLayout = isWindowDefined && window.innerWidth < MODAL_BREAKPOINT;
     const shouldShowSearchMap =
       !isMobileLayout || (isMobileLayout && this.state.isSearchMapOpenOnMobile);
-
+    
     const onMapIconClick = () => {
       this.useLocationSearchBounds = true;
       this.setState({ isSearchMapOpenOnMobile: true });
@@ -154,7 +158,16 @@ export class SearchPageComponent extends Component {
     const topbarClasses = this.state.isMobileModalOpen
       ? classNames(css.topbarBehindModal, css.topbar)
       : css.topbar;
-
+    const containerClasses =!isMobileLayout&&this.state.isSearchMapHiding
+      ? classNames(css.container, css.mapHided)
+      : css.container;
+    const toggleShowingMapButtonMessage = this.state.isSearchMapHiding ? 
+    intl.formatMessage({
+      id : "SearchPage.showingMapButtonText"
+    }) : 
+    intl.formatMessage({
+      id : "SearchPage.hidingMapButtonText"
+    })
     // N.B. openMobileMap button is sticky.
     // For some reason, stickyness doesn't work on Safari, if the element is <button>
     return (
@@ -169,7 +182,7 @@ export class SearchPageComponent extends Component {
           currentPage="SearchPage"
           currentSearchParams={urlQueryParams}
         />
-        <div className={css.container}>
+        <div className={containerClasses}>
           <MainPanel
             urlQueryParams={validQueryParams}
             listings={listings}
@@ -194,9 +207,11 @@ export class SearchPageComponent extends Component {
             showAsModalMaxWidth={MODAL_BREAKPOINT}
             onManageDisableScrolling={onManageDisableScrolling}
           >
-            <div className={css.mapWrapper}>
+            <div>
               {shouldShowSearchMap ? (
                 <SearchMap
+                toggleShowingMapButtonMessage={toggleShowingMapButtonMessage}
+                  onToggleShowingMap={this.onToggleShowingMap}
                   reusableContainerClassName={css.map}
                   activeListingId={activeListingId}
                   bounds={bounds}

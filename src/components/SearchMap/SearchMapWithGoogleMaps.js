@@ -14,6 +14,7 @@ import { SearchMapInfoCard, SearchMapPriceLabel, SearchMapGroupLabel } from '../
 
 import { groupedByCoordinates, reducedToArray } from './SearchMap.helpers.js';
 import css from './SearchMapWithGoogleMaps.module.css';
+import Button from '../Button/Button';
 
 export const LABEL_HANDLE = 'SearchMapLabel';
 export const INFO_CARD_HANDLE = 'SearchMapInfoCard';
