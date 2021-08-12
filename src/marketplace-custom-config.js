@@ -109,8 +109,8 @@ export const filters = [
       // to make filter customizations a bit easier.
       options: [
         {
-          key: 'towels',
-          label: 'Towels',
+          key: 'terrace',
+          label: 'Terrace',
         },
         {
           key: 'bathroom',
@@ -121,25 +121,55 @@ export const filters = [
           label: 'Swimming pool',
         },
         {
-          key: 'own_drinks',
-          label: 'Own drinks allowed',
-        },
-        {
           key: 'jacuzzi',
           label: 'Jacuzzi',
         },
         {
-          key: 'audiovisual_entertainment',
-          label: 'Audiovisual entertainment',
+          key: 'lake_view',
+          label: 'Lake view',
+        },
+        {
+          key: 'sea_view',
+          label: 'Sea view',
         },
         {
           key: 'barbeque',
           label: 'Barbeque',
         },
         {
-          key: 'own_food_allowed',
-          label: 'Own food allowed',
+          key: 'fireplace',
+          label: 'Fireplace',
         },
+      ],
+    },
+  },
+  {
+    id: 'view',
+    label: 'View',
+    type: 'SelectSingleFilter',
+    group: 'secondary',
+    queryParamNames: ['pub_view'],
+    config: {
+      options: [
+        { key: 'sea', label: 'Sea view' },
+        { key: 'lake', label: 'Lake view' },
+        { key: 'forest', label: 'Forest view' },
+        { key: 'garden', label: 'Garden view' },
+      ],
+    },
+  },
+  {
+    id: 'capacity',
+    label: 'Capacity',
+    type: 'SelectSingleFilter',
+    group: 'secondary',
+    queryParamNames: ['pub_capacity'],
+    config: {
+      options: [
+        { key: '1to3', label: '1 to 3' },
+        { key: '4to6', label: '4 to 6' },
+        { key: '7to9', label: '7 to 9' },
+        { key: '10plus', label: '10 plus' },
       ],
     },
   },
