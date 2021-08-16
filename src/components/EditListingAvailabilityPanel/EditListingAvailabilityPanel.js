@@ -8,6 +8,7 @@ import { ListingLink } from '../../components';
 import { EditListingAvailabilityForm } from '../../forms';
 
 import css from './EditListingAvailabilityPanel.module.css';
+import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 const EditListingAvailabilityPanel = props => {
   const {
@@ -23,6 +24,7 @@ const EditListingAvailabilityPanel = props => {
     panelUpdated,
     updateInProgress,
     errors,
+    listingType,
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
@@ -40,7 +42,29 @@ const EditListingAvailabilityPanel = props => {
       { dayOfWeek: 'sun', seats: 1 },
     ],
   };
-  const availabilityPlan = currentListing.attributes.availabilityPlan || defaultAvailabilityPlan;
+  const defaultAvailabilityPlanForEquipment = {
+    type: 'availability-plan/day',
+    entries: [
+      { dayOfWeek: 'mon', seats: 0 },
+      { dayOfWeek: 'tue', seats: 0 },
+      { dayOfWeek: 'wed', seats: 0 },
+      { dayOfWeek: 'thu', seats: 0 },
+      { dayOfWeek: 'fri', seats: 0 },
+      { dayOfWeek: 'sat', seats: 0 },
+      { dayOfWeek: 'sun', seats: 0 },
+    ],
+  };
+  const availabilityPlan = () => {
+    if (currentListing.attributes.availabilityPlan) {
+      return currentListing.attributes.availabilityPlan;
+    } else if (listingType === EQUIPMENT_LISTING_TYPE) {
+      return defaultAvailabilityPlanForEquipment;
+    } else if (listingType === SAUNA_LISTING_TYPE) {
+      return defaultAvailabilityPlan;
+    } else {
+      return defaultAvailabilityPlan;
+    }
+  };
 
   return (
     <div className={classes}>
@@ -57,15 +81,15 @@ const EditListingAvailabilityPanel = props => {
       <EditListingAvailabilityForm
         className={css.form}
         listingId={currentListing.id}
-        initialValues={{ availabilityPlan }}
+        initialValues={{ availabilityPlan: availabilityPlan() }}
         availability={availability}
-        availabilityPlan={availabilityPlan}
+        availabilityPlan={availabilityPlan()}
         onSubmit={() => {
           // We save the default availability plan
           // I.e. this listing is available every night.
           // Exceptions are handled with live edit through a calendar,
           // which is visible on this panel.
-          onSubmit({ availabilityPlan });
+          onSubmit({ availabilityPlan: availabilityPlan() });
         }}
         onChange={onChange}
         saveActionMsg={submitButtonText}
