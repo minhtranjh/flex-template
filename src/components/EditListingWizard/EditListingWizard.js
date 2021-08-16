@@ -48,6 +48,22 @@ export const TABS = [
   PHOTOS,
 ];
 
+export const EQUIPMENT_TABS = [DESCRIPTION, LOCATION, PRICING, ...availabilityMaybe];
+
+export const EQUIPMENT_LISTING_TYPE = 'equipment';
+export const SAUNA_LISTING_TYPE = 'sauna';
+
+const tabsToUse = listingType => {
+  switch (listingType) {
+    case EQUIPMENT_LISTING_TYPE:
+      return EQUIPMENT_TABS;
+    case SAUNA_LISTING_TYPE:
+      return TABS;
+    default:
+      return TABS;
+  }
+};
+
 // Tabs are horizontal in small screens
 const MAX_HORIZONTAL_NAV_SCREEN_WIDTH = 1023;
 
@@ -127,11 +143,13 @@ const tabCompleted = (tab, listing) => {
  *
  * @return object containing activity / editability of different tabs of this wizard
  */
-const tabsActive = (isNew, listing) => {
-  return TABS.reduce((acc, tab) => {
-    const previousTabIndex = TABS.findIndex(t => t === tab) - 1;
+const tabsActive = (isNew, listing, listingType) => {
+  return tabsToUse(listingType).reduce((acc, tab) => {
+    const previousTabIndex = tabsToUse(listingType).findIndex(t => t === tab) - 1;
     const isActive =
-      previousTabIndex >= 0 ? !isNew || tabCompleted(TABS[previousTabIndex], listing) : true;
+      previousTabIndex >= 0
+        ? !isNew || tabCompleted(tabsToUse(listingType)[previousTabIndex], listing)
+        : true;
     return { ...acc, [tab]: isActive };
   }, {});
 };
@@ -291,11 +309,12 @@ class EditListingWizard extends Component {
     const rootClasses = rootClassName || css.root;
     const classes = classNames(rootClasses, className);
     const currentListing = ensureListing(listing);
-    const tabsStatus = tabsActive(isNewListingFlow, currentListing);
+    const tabsStatus = tabsActive(isNewListingFlow, currentListing, params.listingType);
     // If selectedTab is not active, redirect to the beginning of wizard
     if (!tabsStatus[selectedTab]) {
-      const currentTabIndex = TABS.indexOf(selectedTab);
-      const nearestActiveTab = TABS.slice(0, currentTabIndex)
+      const currentTabIndex = tabsToUse(params.listingType).indexOf(selectedTab);
+      const nearestActiveTab = tabsToUse(params.listingType)
+        .slice(0, currentTabIndex)
         .reverse()
         .find(t => tabsStatus[t]);
 
@@ -317,9 +336,15 @@ class EditListingWizard extends Component {
       scrollToTab(tabPrefix, selectedTab);
       this.hasScrolledToTab = true;
     }
-
     const tabLink = tab => {
-      return { name: 'EditListingPage', params: { ...params, tab } };
+      switch (params.listingType) {
+        case EQUIPMENT_LISTING_TYPE:
+          return { name: 'EditEquipmentListingPage', params: { ...params, tab } };
+        case SAUNA_LISTING_TYPE:
+          return { name: 'EditListingPage', params: { ...params, tab } };
+        default:
+          return { name: 'EditListingPage', params: { ...params, tab } };
+      }
     };
 
     const formDisabled = getAccountLinkInProgress;
@@ -377,7 +402,7 @@ class EditListingWizard extends Component {
           navRootClassName={css.nav}
           tabRootClassName={css.tab}
         >
-          {TABS.map(tab => {
+          {tabsToUse(params.listingType).map(tab => {
             return (
               <EditListingWizardTab
                 {...rest}
@@ -391,7 +416,7 @@ class EditListingWizard extends Component {
                 intl={intl}
                 params={params}
                 listing={listing}
-                marketplaceTabs={TABS}
+                marketplaceTabs={tabsToUse(params.listingType)}
                 errors={errors}
                 handleCreateFlowTabScrolling={this.handleCreateFlowTabScrolling}
                 handlePublishListing={this.handlePublishListing}
