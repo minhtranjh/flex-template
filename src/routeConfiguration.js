@@ -36,6 +36,7 @@ const FAQPage = loadable(() =>
     /* webpackChunkName: "FAQPage" */ './containers/FAQPage/FAQPage'
   )
 );
+const EquipmentListingPage = loadable(() => import(/* webpackChunkName: "EditListingPage" */ './containers/ListingPage/EquipmentListingPage'));
 // Styleguide helps you to review current components and develop new ones
 const StyleguidePage = loadable(() => import(/* webpackChunkName: "StyleguidePage" */ './containers/StyleguidePage/StyleguidePage'));
 
@@ -90,7 +91,13 @@ const routeConfiguration = () => {
       loadData: pageDataLoadingAPI.ListingPage.loadData,
     },
     {
-      path: '/l/:slug/:id/checkout',
+      path: '/l/:listingType/:slug/:id',
+      name: 'EquipmentListingPage',
+      component: EquipmentListingPage,
+      loadData: pageDataLoadingAPI.ListingPage.loadData,
+    },
+    {
+      path: '/l/:listingType/:slug/:id/checkout',
       name: 'CheckoutPage',
       auth: true,
       component: CheckoutPage,
@@ -111,13 +118,31 @@ const routeConfiguration = () => {
       component: () => (
         <NamedRedirect
           name="EditListingPage"
-          params={{ slug: draftSlug, id: draftId, type: 'new', tab: 'description' }}
+          params={{ slug: draftSlug,listingType:"sauna", id: draftId, type: 'new', tab: 'description' }}
         />
       ),
     },
     {
-      path: '/l/:slug/:id/:type/:tab',
+      path: '/l/:listingType/:slug/:id/:type/:tab',
       name: 'EditListingPage',
+      auth: true,
+      component: EditListingPage,
+      loadData: pageDataLoadingAPI.EditListingPage.loadData,
+    },
+    {
+      path: '/e/new',
+      name: 'NewEquipmentListingPage',
+      auth: true,
+      component: () => (
+        <NamedRedirect
+          name="EditEquipmentListingPage"
+          params={{ slug: draftSlug,listingType:"equipment" , id: draftId, type: 'new', tab: 'description'}}
+        />
+      ),
+    },
+    {
+      path: '/l/:listingType/:slug/:id/:type/:tab',
+      name: 'EditEquipmentListingPage',
       auth: true,
       component: EditListingPage,
       loadData: pageDataLoadingAPI.EditListingPage.loadData,

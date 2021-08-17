@@ -54,19 +54,33 @@ export const ListingCardComponent = props => {
     currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
 
   const { formattedPrice, priceTitle } = priceData(price, intl);
-
+  const listingType = "sauna"
   const unitType = config.bookingUnitType;
   const isNightly = unitType === LINE_ITEM_NIGHT;
   const isDaily = unitType === LINE_ITEM_DAY;
-
-  const unitTranslationKey = isNightly
-    ? 'ListingCard.perNight'
-    : isDaily
-    ? 'ListingCard.perDay'
-    : 'ListingCard.perUnit';
-
+  const unitTranslationKey = ()=>{
+    if(listingType==="equipment"){
+      return "ListingPage.perItem"
+    }
+    if(isNightly){
+      return 'ListingPage.perNight'
+    }
+    if(isDaily){
+     return 'ListingPage.perDay'
+    }
+    return  'ListingPage.perUnit';
+   }
+  const goToPage = ()=>{
+    if(listingType==="equipment"){
+      return "EquipmentListingPage"
+    }
+    if(listingType==="sauna"){
+      return "ListingPage"
+    }
+    return "ListingPage"
+  }
   return (
-    <NamedLink className={classes} name="ListingPage" params={{ id, slug }}>
+    <NamedLink className={classes} name={goToPage()} params={{ id, slug ,listingType }}>
       <div
         className={css.threeToTwoWrapper}
         onMouseEnter={() => setActiveListing(currentListing.id)}
@@ -88,7 +102,7 @@ export const ListingCardComponent = props => {
             {formattedPrice}
           </div>
           <div className={css.perUnit}>
-            <FormattedMessage id={unitTranslationKey} />
+            <FormattedMessage id={unitTranslationKey()} />
           </div>
         </div>
         <div className={css.mainInfo}>

@@ -210,7 +210,7 @@ export class SearchPageComponent extends Component {
             <div>
               {shouldShowSearchMap ? (
                 <SearchMap
-                toggleShowingMapButtonMessage={toggleShowingMapButtonMessage}
+                  toggleShowingMapButtonMessage={toggleShowingMapButtonMessage}
                   onToggleShowingMap={this.onToggleShowingMap}
                   reusableContainerClassName={css.map}
                   activeListingId={activeListingId}

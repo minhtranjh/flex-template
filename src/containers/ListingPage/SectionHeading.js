@@ -15,17 +15,25 @@ const SectionHeading = props => {
     hostLink,
     showContactUser,
     onContactUser,
+    listingType
   } = props;
 
   const unitType = config.bookingUnitType;
   const isNightly = unitType === LINE_ITEM_NIGHT;
   const isDaily = unitType === LINE_ITEM_DAY;
 
-  const unitTranslationKey = isNightly
-    ? 'ListingPage.perNight'
-    : isDaily
-    ? 'ListingPage.perDay'
-    : 'ListingPage.perUnit';
+  const unitTranslationKey = ()=>{
+   if(listingType==="equipment"){
+     return "ListingPage.perItem"
+   }
+   if(isNightly){
+     return 'ListingPage.perNight'
+   }
+   if(isDaily){
+    return 'ListingPage.perDay'
+   }
+   return  'ListingPage.perUnit';
+  }
 
   return (
     <div className={css.sectionHeading}>
@@ -34,7 +42,7 @@ const SectionHeading = props => {
           {formattedPrice}
         </div>
         <div className={css.desktopPerUnit}>
-          <FormattedMessage id={unitTranslationKey} />
+          <FormattedMessage id={unitTranslationKey()} />
         </div>
       </div>
       <div className={css.heading}>
