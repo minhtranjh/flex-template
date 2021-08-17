@@ -54,7 +54,7 @@ export const ListingCardComponent = props => {
     currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
 
   const { formattedPrice, priceTitle } = priceData(price, intl);
-  const listingType = "sauna"
+  const listingType = currentListing.attributes.publicData.listingType
   const unitType = config.bookingUnitType;
   const isNightly = unitType === LINE_ITEM_NIGHT;
   const isDaily = unitType === LINE_ITEM_DAY;
