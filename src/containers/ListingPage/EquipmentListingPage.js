@@ -39,21 +39,20 @@ import {
   Footer,
   BookingPanel,
 } from '../../components';
-import { TopbarContainer, NotFoundPage } from '../../containers';
+import { TopbarContainer, NotFoundPage } from '..';
 
 import { sendEnquiry, fetchTransactionLineItems, setInitialValues } from './ListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
 import SectionDescriptionMaybe from './SectionDescriptionMaybe';
-import SectionFeaturesMaybe from './SectionFeaturesMaybe';
 import SectionReviews from './SectionReviews';
 import SectionHostMaybe from './SectionHostMaybe';
-import SectionRulesMaybe from './SectionRulesMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
 import css from './ListingPage.module.css';
-import SectionViewMaybe from './SectionViewMaybe';
-import SectionCapacityMaybe from './SectionCapacityMaybe';
+import SectionEquipmentTypesMaybe from './SectionEquipmentTypesMaybe';
+import SectionManufactureYearMaybe from './SectionManufactureYearMaybe';
+import SectionMaxUsingTimeADay from './SectionMaxUsingTimeADay';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -77,7 +76,7 @@ const categoryLabel = (categories, key) => {
   return cat ? cat.label : key;
 };
 
-export class ListingPageComponent extends Component {
+export class EquipmentListingPageComponent extends Component {
   constructor(props) {
     super(props);
     const { enquiryModalOpenForListingId, params } = props;
@@ -102,7 +101,6 @@ export class ListingPageComponent extends Component {
     } = this.props;
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
-
     const { bookingDates, ...bookingData } = values;
 
     const initialValues = {
@@ -131,11 +129,7 @@ export class ListingPageComponent extends Component {
       createResourceLocatorString(
         'CheckoutPage',
         routes,
-        {
-          id: listing.id.uuid,
-          listingType: listing.attributes.publicData.listingType,
-          slug: createSlug(listing.attributes.title),
-        },
+        { id: listing.id.uuid, slug: createSlug(listing.attributes.title) },
         {}
       )
     );
@@ -177,7 +171,6 @@ export class ListingPageComponent extends Component {
         // Ignore, error handling in duck file
       });
   }
-
   render() {
     const {
       unitType,
@@ -203,7 +196,6 @@ export class ListingPageComponent extends Component {
       fetchLineItemsInProgress,
       fetchLineItemsError,
     } = this.props;
-
     const listingId = new UUID(rawParams.id);
     const isPendingApprovalVariant = rawParams.variant === LISTING_PAGE_PENDING_APPROVAL_VARIANT;
     const isDraftVariant = rawParams.variant === LISTING_PAGE_DRAFT_VARIANT;
@@ -211,7 +203,6 @@ export class ListingPageComponent extends Component {
       isPendingApprovalVariant || isDraftVariant
         ? ensureOwnListing(getOwnListing(listingId)) //??
         : ensureListing(getListing(listingId));
-
     const listingSlug = rawParams.slug || createSlug(currentListing.attributes.title || '');
     const params = { slug: listingSlug, ...rawParams };
 
@@ -382,17 +373,7 @@ export class ListingPageComponent extends Component {
       </NamedLink>
     );
 
-    const amenityOptions = findOptionsForSelectFilter('amenities', filterConfig);
-    const categoryOptions = findOptionsForSelectFilter('category', filterConfig);
-    const capacityOptions = findOptionsForSelectFilter('capacity', filterConfig);
-    const category =
-      publicData && publicData.category ? (
-        <span>
-          {categoryLabel(categoryOptions, publicData.category)}
-          <span className={css.separator}>•</span>
-        </span>
-      ) : null;
-    const viewOptions = findOptionsForSelectFilter('view', filterConfig);
+    const equipmentTypeOptions = findOptionsForSelectFilter('equipmentTypes', filterConfig);
     return (
       <Page
         title={schemaTitle}
@@ -422,6 +403,7 @@ export class ListingPageComponent extends Component {
                   id: listingId.uuid,
                   slug: listingSlug,
                   type: listingType,
+                  listingType : currentListing.attributes.publicData.listingType,
                   tab: listingTab,
                 }}
                 imageCarouselOpen={this.state.imageCarouselOpen}
@@ -436,16 +418,27 @@ export class ListingPageComponent extends Component {
                     priceTitle={priceTitle}
                     formattedPrice={formattedPrice}
                     richTitle={richTitle}
-                    category={category}
                     hostLink={hostLink}
+                    listingType={currentListing.attributes.publicData.listingType}
                     showContactUser={showContactUser}
                     onContactUser={this.onContactUser}
                   />
-                  <SectionDescriptionMaybe description={description} />
-                  <SectionFeaturesMaybe options={amenityOptions} publicData={publicData} />
-                  <SectionRulesMaybe publicData={publicData} />
-                  <SectionViewMaybe publicData={publicData} options={viewOptions} />
-                  <SectionCapacityMaybe publicData={publicData} options={capacityOptions} />
+                  <SectionDescriptionMaybe
+                    listingType={currentListing.attributes.publicData.listingType}
+                    description={description}
+                  />
+                  <SectionEquipmentTypesMaybe
+                    options={equipmentTypeOptions}
+                    publicData={publicData}
+                  />
+                  <SectionManufactureYearMaybe
+                    manufactureYear={currentListing.attributes.publicData.manufactureYear}
+                    listingType={listingType}
+                  />
+                  <SectionMaxUsingTimeADay
+                    maxUsingTimeADay={currentListing.attributes.publicData.maxUsingTimeADay}
+                    listingType={listingType}
+                  />
                   <SectionMapMaybe
                     geolocation={geolocation}
                     publicData={publicData}
@@ -495,7 +488,7 @@ export class ListingPageComponent extends Component {
   }
 }
 
-ListingPageComponent.defaultProps = {
+EquipmentListingPageComponent.defaultProps = {
   unitType: config.bookingUnitType,
   currentUser: null,
   enquiryModalOpenForListingId: null,
@@ -510,7 +503,7 @@ ListingPageComponent.defaultProps = {
   fetchLineItemsError: null,
 };
 
-ListingPageComponent.propTypes = {
+EquipmentListingPageComponent.propTypes = {
   // from withRouter
   history: shape({
     push: func.isRequired,
@@ -619,13 +612,13 @@ const mapDispatchToProps = dispatch => ({
 // lifecycle hook.
 //
 // See: https://github.com/ReactTraining/react-router/issues/4671
-const ListingPage = compose(
+const EquipmentListingPage = compose(
   withRouter,
   connect(
     mapStateToProps,
     mapDispatchToProps
   ),
   injectIntl
-)(ListingPageComponent);
+)(EquipmentListingPageComponent);
 
-export default ListingPage;
+export default EquipmentListingPage;

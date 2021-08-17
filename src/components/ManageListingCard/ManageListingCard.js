@@ -72,7 +72,7 @@ const createListingURL = (routes, listing) => {
     : isPendingApproval
     ? LISTING_PAGE_PENDING_APPROVAL_VARIANT
     : null;
-
+  const { listingType } = listing.attributes.publicData;
   const linkProps =
     isPendingApproval || isDraft
       ? {
@@ -81,11 +81,17 @@ const createListingURL = (routes, listing) => {
             id,
             slug,
             variant,
+            listingType,
           },
+        }
+      : listingType
+      ? {
+          name: 'EquipmentListingPage',
+          params: { id, slug, listingType },
         }
       : {
           name: 'ListingPage',
-          params: { id, slug },
+          params: { id, slug, listingType },
         };
 
   return createResourceLocatorString(linkProps.name, routes, linkProps.params, {});
@@ -167,12 +173,19 @@ export const ManageListingCardComponent = props => {
   const unitType = config.bookingUnitType;
   const isNightly = unitType === LINE_ITEM_NIGHT;
   const isDaily = unitType === LINE_ITEM_DAY;
-
-  const unitTranslationKey = isNightly
-    ? 'ManageListingCard.perNight'
-    : isDaily
-    ? 'ManageListingCard.perDay'
-    : 'ManageListingCard.perUnit';
+  const listingType = currentListing.attributes.publicData.listingType
+  const unitTranslationKey = ()=>{
+    if(listingType==="equipment"){
+      return "ListingPage.perItem"
+    }
+    if(isNightly){
+      return 'ListingPage.perNight'
+    }
+    if(isDaily){
+     return 'ListingPage.perDay'
+    }
+    return  'ListingPage.perUnit';
+   }
 
   return (
     <div className={classes}>
@@ -313,7 +326,7 @@ export const ManageListingCardComponent = props => {
                 {formattedPrice}
               </div>
               <div className={css.perUnit}>
-                <FormattedMessage id={unitTranslationKey} />
+                <FormattedMessage id={unitTranslationKey()} />
               </div>
             </React.Fragment>
           ) : (

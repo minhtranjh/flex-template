@@ -42,7 +42,11 @@ export const ActionBarMaybe = props => {
         <p className={ownListingTextClasses}>
           <FormattedMessage id={ownListingTextTranslationId} />
         </p>
-        <NamedLink className={css.editListingLink} name="EditListingPage" params={editParams}>
+        <NamedLink
+          className={css.editListingLink}
+          name={editParams.listingType ? 'EditEquipmentListingPage' : 'EditListingPage'}
+          params={editParams}
+        >
           <EditIcon className={css.editIcon} />
           <FormattedMessage id={message} />
         </NamedLink>

@@ -74,6 +74,7 @@ export const filters = [
     config: {},
   },
   {
+
     id : "equipmentCategory",
     label : "Equipment Category",
     type: 'SelectMultipleFilter',
