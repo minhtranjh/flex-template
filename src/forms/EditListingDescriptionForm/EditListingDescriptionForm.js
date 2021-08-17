@@ -22,7 +22,7 @@ const EditListingDescriptionFormComponent = props => (
     render={formRenderProps => {
       const {
         categories,
-        equipmentCategories,
+        equipmentTypes,
         className,
         disabled,
         ready,
@@ -281,9 +281,9 @@ const EditListingDescriptionFormComponent = props => (
           {listingType === EQUIPMENT_LISTING_TYPE ? (
             <FieldCheckboxGroup
               label={translatedTypeMessages().label}
-              id="equipmentCategory"
-              name="equipmentCategory"
-              options={equipmentCategories}
+              id="equipmentTypes"
+              name="equipmentTypes"
+              options={equipmentTypes}
             />
           ) : (
             <CustomCategorySelectFieldMaybe

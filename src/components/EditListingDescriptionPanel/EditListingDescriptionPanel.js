@@ -49,8 +49,8 @@ const EditListingDescriptionPanel = props => {
   };
 
   const categoryOptions = findOptionsForSelectFilter('category', config.custom.filters);
-  const equipmentCategoryOptions = findOptionsForSelectFilter(
-    'equipmentCategory',
+  const equipmentTypesOptions = findOptionsForSelectFilter(
+    'equipmentTypes',
     config.custom.filters
   );
 
@@ -60,7 +60,7 @@ const EditListingDescriptionPanel = props => {
         return {
           title,
           description,
-          equipmentCategory: publicData.equipmentCategory,
+          equipmentTypes : publicData.equipmentTypes,
           manufactureYear: publicData.manufactureYear,
           maxUsingTimeADay: publicData.maxUsingTimeADay,
         };
@@ -83,14 +83,14 @@ const EditListingDescriptionPanel = props => {
       const {
         title,
         description,
-        equipmentCategory = [],
+        equipmentTypes = [],
         manufactureYear,
         maxUsingTimeADay,
       } = values;
       const updateValues = {
         title: title.trim(),
         description,
-        publicData: { equipmentCategory, manufactureYear, maxUsingTimeADay, listingType },
+        publicData: { equipmentTypes, manufactureYear, maxUsingTimeADay, listingType },
       };
 
       onSubmit(updateValues);
@@ -125,7 +125,7 @@ const EditListingDescriptionPanel = props => {
         updateInProgress={updateInProgress}
         fetchErrors={errors}
         categories={categoryOptions}
-        equipmentCategories={equipmentCategoryOptions}
+        equipmentTypes={equipmentTypesOptions}
       />
     </div>
   );
