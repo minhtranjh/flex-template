@@ -21,6 +21,7 @@ import {
 
 import css from './EditListingWizard.module.css';
 import EditListingCapacityPanel from '../EditListingCapacityPanel/EditListingCapacityPanel';
+import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from './EditListingWizard';
 
 export const AVAILABILITY = 'availability';
 export const DESCRIPTION = 'description';
@@ -63,14 +64,39 @@ const redirectAfterDraftUpdate = (listingId, params, tab, marketplaceTabs, histo
   // Replace current "new" path to "draft" path.
   // Browser's back button should lead to editing current draft instead of creating a new one.
   if (params.type === LISTING_PAGE_PARAM_TYPE_NEW) {
-    const draftURI = createResourceLocatorString('EditListingPage', routes, currentPathParams, {});
-    history.replace(draftURI);
+    if (params.listingType && params.listingType === EQUIPMENT_LISTING_TYPE) {
+      const draftURI = createResourceLocatorString(
+        'EditEquipmentListingPage',
+        routes,
+        currentPathParams,
+        {}
+      );
+      history.replace(draftURI);
+      return;
+    }
+    if (params.listingType && params.listingType === SAUNA_LISTING_TYPE) {
+      const draftURI = createResourceLocatorString(
+        'EditListingPage',
+        routes,
+        currentPathParams,
+        {}
+      );
+      history.replace(draftURI);
+      return;
+    }
   }
 
   // Redirect to next tab
   const nextPathParams = pathParamsToNextTab(currentPathParams, tab, marketplaceTabs);
-  const to = createResourceLocatorString('EditListingPage', routes, nextPathParams, {});
-  history.push(to);
+  if (params.listingType && params.listingType === EQUIPMENT_LISTING_TYPE) {
+    const to = createResourceLocatorString('EditEquipmentListingPage', routes, nextPathParams, {});
+    history.push(to);
+    return;
+  }
+  if (params.listingType && params.listingType === SAUNA_LISTING_TYPE) {
+    const to = createResourceLocatorString('EditListingPage', routes, nextPathParams, {});
+    history.push(to);
+  }
 };
 
 const EditListingWizardTab = props => {
@@ -98,7 +124,7 @@ const EditListingWizardTab = props => {
     intl,
   } = props;
 
-  const { type } = params;
+  const { type, listingType = '' } = params;
   const isNewURI = type === LISTING_PAGE_PARAM_TYPE_NEW;
   const isDraftURI = type === LISTING_PAGE_PARAM_TYPE_DRAFT;
   const isNewListingFlow = isNewURI || isDraftURI;
@@ -157,15 +183,69 @@ const EditListingWizardTab = props => {
       disabled: fetchInProgress,
     };
   };
-
+  const submitButtonDescriptionTranlastionToUse = listingType => {
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return 'EditListingWizard.saveNewDescriptionEquipment';
+      case SAUNA_LISTING_TYPE:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewDescription'
+          : 'EditListingWizard.saveEditDescription';
+      default:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewDescription'
+          : 'EditListingWizard.saveEditDescription';
+    }
+  };
+  const submitButtonLocationTranlastionToUse = listingType => {
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return 'EditListingWizard.saveNewLocationEquipment';
+      case SAUNA_LISTING_TYPE:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewLocation'
+          : 'EditListingWizard.saveEditLocation';
+      default:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewLocation'
+          : 'EditListingWizard.saveEditLocation';
+    }
+  };
+  const submitButtonPricingTranlastionToUse = listingType => {
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return 'EditListingWizard.saveNewPricingEquipment';
+      case SAUNA_LISTING_TYPE:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewPricing'
+          : 'EditListingWizard.saveEditPricing';
+      default:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewPricing'
+          : 'EditListingWizard.saveEditPricing';
+    }
+  };
+  const submitButtonAvailabilityTranslationToUse = listingType => {
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return 'EditListingWizard.saveNewAvailabilityEquipment';
+      case SAUNA_LISTING_TYPE:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewAvailability'
+          : 'EditListingWizard.saveEditAvailability';
+      default:
+        return isNewListingFlow
+          ? 'EditListingWizard.saveNewAvailability'
+          : 'EditListingWizard.saveEditAvailability';
+    }
+  };
   switch (tab) {
     case DESCRIPTION: {
-      const submitButtonTranslationKey = isNewListingFlow
-        ? 'EditListingWizard.saveNewDescription'
-        : 'EditListingWizard.saveEditDescription';
+      const submitButtonTranslationKey = submitButtonDescriptionTranlastionToUse(listingType);
       return (
         <EditListingDescriptionPanel
           {...panelProps(DESCRIPTION)}
+          listingType={listingType}
           submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
           onSubmit={values => {
             onCompleteEditListingWizardTab(tab, values);
@@ -216,11 +296,10 @@ const EditListingWizardTab = props => {
       );
     }
     case LOCATION: {
-      const submitButtonTranslationKey = isNewListingFlow
-        ? 'EditListingWizard.saveNewLocation'
-        : 'EditListingWizard.saveEditLocation';
+      const submitButtonTranslationKey = submitButtonLocationTranlastionToUse(listingType);
       return (
         <EditListingLocationPanel
+          listingType={listingType}
           {...panelProps(LOCATION)}
           submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
           onSubmit={values => {
@@ -230,11 +309,10 @@ const EditListingWizardTab = props => {
       );
     }
     case PRICING: {
-      const submitButtonTranslationKey = isNewListingFlow
-        ? 'EditListingWizard.saveNewPricing'
-        : 'EditListingWizard.saveEditPricing';
+      const submitButtonTranslationKey = submitButtonPricingTranlastionToUse(listingType);
       return (
         <EditListingPricingPanel
+          listingType={listingType}
           {...panelProps(PRICING)}
           submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
           onSubmit={values => {
@@ -244,12 +322,11 @@ const EditListingWizardTab = props => {
       );
     }
     case AVAILABILITY: {
-      const submitButtonTranslationKey = isNewListingFlow
-        ? 'EditListingWizard.saveNewAvailability'
-        : 'EditListingWizard.saveEditAvailability';
+      const submitButtonTranslationKey = submitButtonAvailabilityTranslationToUse(listingType);
       return (
         <EditListingAvailabilityPanel
           {...panelProps(AVAILABILITY)}
+          listingType={listingType}
           availability={availability}
           submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
           onSubmit={values => {

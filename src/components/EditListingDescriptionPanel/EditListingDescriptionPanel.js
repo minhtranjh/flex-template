@@ -10,6 +10,7 @@ import { EditListingDescriptionForm } from '../../forms';
 import config from '../../config';
 
 import css from './EditListingDescriptionPanel.module.css';
+import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 const EditListingDescriptionPanel = props => {
   const {
@@ -24,40 +25,99 @@ const EditListingDescriptionPanel = props => {
     panelUpdated,
     updateInProgress,
     errors,
+    listingType,
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
   const currentListing = ensureOwnListing(listing);
   const { description, title, publicData } = currentListing.attributes;
-
   const isPublished = currentListing.id && currentListing.attributes.state !== LISTING_STATE_DRAFT;
-  const panelTitle = isPublished ? (
-    <FormattedMessage
-      id="EditListingDescriptionPanel.title"
-      values={{ listingTitle: <ListingLink listing={listing} /> }}
-    />
-  ) : (
-    <FormattedMessage id="EditListingDescriptionPanel.createListingTitle" />
-  );
+
+  const panelTitle = () => {
+    if (isPublished) {
+      return (
+        <FormattedMessage
+          id="EditListingDescriptionPanel.title"
+          values={{ listingTitle: <ListingLink listing={listing} /> }}
+        />
+      );
+    } else if (listingType === EQUIPMENT_LISTING_TYPE) {
+      return <FormattedMessage id="EditListingDescriptionPanel.createEquipmentListingTitle" />;
+    } else {
+      return <FormattedMessage id="EditListingDescriptionPanel.createListingTitle" />;
+    }
+  };
 
   const categoryOptions = findOptionsForSelectFilter('category', config.custom.filters);
+  const equipmentCategoryOptions = findOptionsForSelectFilter(
+    'equipmentCategory',
+    config.custom.filters
+  );
+
+  const initialValues = () => {
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return {
+          title,
+          description,
+          equipmentCategory: publicData.equipmentCategory,
+          manufactureYear: publicData.manufactureYear,
+          maxUsingTimeADay: publicData.maxUsingTimeADay,
+        };
+      case SAUNA_LISTING_TYPE:
+        return {
+          title,
+          description,
+          category: publicData.category,
+        };
+      default:
+        return {
+          title,
+          description,
+          category: publicData.category,
+        };
+    }
+  };
+  const handleSubmitListingDescription = values => {
+    if (listingType === EQUIPMENT_LISTING_TYPE) {
+      const {
+        title,
+        description,
+        equipmentCategory = [],
+        manufactureYear,
+        maxUsingTimeADay,
+      } = values;
+      const updateValues = {
+        title: title.trim(),
+        description,
+        publicData: { equipmentCategory, manufactureYear, maxUsingTimeADay, listingType },
+      };
+
+      onSubmit(updateValues);
+      return;
+    }
+    if(listingType===SAUNA_LISTING_TYPE){
+      const { title, description, category } = values;
+      const updateValues = {
+        title: title.trim(),
+        description,
+        publicData: { category, listingType: 'sauna' },
+      };
+      onSubmit(updateValues);
+      return
+    }
+  };
   return (
     <div className={classes}>
-      <h1 className={css.title}>{panelTitle}</h1>
+      <h1 className={css.title}>{panelTitle()}</h1>
       <EditListingDescriptionForm
         className={css.form}
-        initialValues={{ title, description, category: publicData.category }}
+        initialValues={initialValues()}
         saveActionMsg={submitButtonText}
         onSubmit={values => {
-          const { title, description, category } = values;
-          const updateValues = {
-            title: title.trim(),
-            description,
-            publicData: { category },
-          };
-
-          onSubmit(updateValues);
+          handleSubmitListingDescription(values);
         }}
+        listingType={listingType}
         onChange={onChange}
         disabled={disabled}
         ready={ready}
@@ -65,6 +125,7 @@ const EditListingDescriptionPanel = props => {
         updateInProgress={updateInProgress}
         fetchErrors={errors}
         categories={categoryOptions}
+        equipmentCategories={equipmentCategoryOptions}
       />
     </div>
   );
