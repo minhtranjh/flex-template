@@ -20,10 +20,23 @@ const toPathByRouteName = (nameToFind, routes) => {
 /**
  * Shorthand for single path call. (```pathByRouteName('ListingPage', routes, { id: uuidX });```)
  */
+
 export const pathByRouteName = (nameToFind, routes, params = {}) => {
   const hasEmptySlug = params && params.hasOwnProperty('slug') && params.slug === '';
-  const pathParams = hasEmptySlug ? { ...params, slug: 'no-slug' } : params;
-  return toPathByRouteName(nameToFind, routes)(pathParams);
+  const hasEmptyListingType = params&&!params.listingType;
+  const pathParams = hasEmptySlug
+    ? {
+        ...params,
+        slug: 'no-slug',
+      }
+    : params;
+  const pathParamToUse = hasEmptyListingType
+    ? {
+        ...pathParams,
+        listingType: 'no-listingType',
+      }
+    : pathParams;
+  return toPathByRouteName(nameToFind, routes)(pathParamToUse);
 };
 
 /**
