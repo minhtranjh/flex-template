@@ -61,6 +61,22 @@ export const filters = [
     },
   },
   {
+    id: 'maxUsingTimeADay',
+    label: 'Max using time for a day',
+    type: 'MaxUsingTimeADayFilter',
+    group: 'secondary',
+    // Note: PriceFilter is fixed filter,
+    // you can't change "queryParamNames: ['price'],"
+    queryParamNames: ['pub_maxUsingTimeADay'],
+    // Price filter configuration
+    // Note: unlike most prices this is not handled in subunits
+    config: {
+      min: 0,
+      max: 50,
+      step: 1,
+    },
+  },
+  {
     id: 'keyword',
     label: 'Keyword',
     type: 'KeywordFilter',

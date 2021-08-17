@@ -6,6 +6,7 @@ import {
   SelectSingleFilter,
   SelectMultipleFilter,
 } from '../../components';
+import MaxUsingTimeADayFilter from '../../components/MaxUsingTimeADayFilter/MaxUsingTimeADayFilter';
 
 /**
  * FilterComponent is used to map configured filter types
@@ -72,6 +73,19 @@ const FilterComponent = props => {
     case 'PriceFilter': {
       return (
         <PriceFilter
+          id={componentId}
+          label={label}
+          queryParamNames={queryParamNames}
+          initialValues={initialValues(queryParamNames)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          {...config}
+          {...rest}
+        />
+      );
+    }
+    case 'MaxUsingTimeADayFilter': {
+      return (
+        <MaxUsingTimeADayFilter
           id={componentId}
           label={label}
           queryParamNames={queryParamNames}

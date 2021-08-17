@@ -49,10 +49,7 @@ const EditListingDescriptionPanel = props => {
   };
 
   const categoryOptions = findOptionsForSelectFilter('category', config.custom.filters);
-  const equipmentTypesOptions = findOptionsForSelectFilter(
-    'equipmentTypes',
-    config.custom.filters
-  );
+  const equipmentTypesOptions = findOptionsForSelectFilter('equipmentTypes', config.custom.filters);
 
   const initialValues = () => {
     switch (listingType) {
@@ -60,7 +57,7 @@ const EditListingDescriptionPanel = props => {
         return {
           title,
           description,
-          equipmentTypes : publicData.equipmentTypes,
+          equipmentTypes: publicData.equipmentTypes,
           manufactureYear: publicData.manufactureYear,
           maxUsingTimeADay: publicData.maxUsingTimeADay,
         };
@@ -80,23 +77,22 @@ const EditListingDescriptionPanel = props => {
   };
   const handleSubmitListingDescription = values => {
     if (listingType === EQUIPMENT_LISTING_TYPE) {
-      const {
-        title,
-        description,
-        equipmentTypes = [],
-        manufactureYear,
-        maxUsingTimeADay,
-      } = values;
+      const { title, description, equipmentTypes = [], manufactureYear, maxUsingTimeADay } = values;
       const updateValues = {
         title: title.trim(),
         description,
-        publicData: { equipmentTypes, manufactureYear, maxUsingTimeADay, listingType },
+        publicData: {
+          equipmentTypes,
+          manufactureYear: manufactureYear,
+          maxUsingTimeADay: Number(maxUsingTimeADay),
+          listingType,
+        },
       };
 
       onSubmit(updateValues);
       return;
     }
-    if(listingType===SAUNA_LISTING_TYPE){
+    if (listingType === SAUNA_LISTING_TYPE) {
       const { title, description, category } = values;
       const updateValues = {
         title: title.trim(),
@@ -104,7 +100,7 @@ const EditListingDescriptionPanel = props => {
         publicData: { category, listingType: 'sauna' },
       };
       onSubmit(updateValues);
-      return
+      return;
     }
   };
   return (
