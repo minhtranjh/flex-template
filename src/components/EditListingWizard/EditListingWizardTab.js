@@ -22,6 +22,7 @@ import {
 import css from './EditListingWizard.module.css';
 import EditListingCapacityPanel from '../EditListingCapacityPanel/EditListingCapacityPanel';
 import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from './EditListingWizard';
+import EditEquipmentListingPhotosPanel from '../EditEquipmentListingPhotosPanel/EditEquipmentListingPhotosPanel';
 
 export const AVAILABILITY = 'availability';
 export const DESCRIPTION = 'description';
@@ -30,6 +31,7 @@ export const POLICY = 'policy';
 export const LOCATION = 'location';
 export const PRICING = 'pricing';
 export const PHOTOS = 'photos';
+export const EQUIPMENT_PHOTOS = 'equipmentPhotos';
 export const CAPACITY = 'capacity';
 // EditListingWizardTab component supports these tabs
 export const SUPPORTED_TABS = [
@@ -41,6 +43,7 @@ export const SUPPORTED_TABS = [
   AVAILABILITY,
   PHOTOS,
   CAPACITY,
+  EQUIPMENT_PHOTOS,
 ];
 
 const pathParamsToNextTab = (params, tab, marketplaceTabs) => {
@@ -72,9 +75,8 @@ const redirectAfterDraftUpdate = (listingId, params, tab, marketplaceTabs, histo
         {}
       );
       history.replace(draftURI);
-      return;
     }
-    if (params.listingType && params.listingType === SAUNA_LISTING_TYPE) {
+    else if (params.listingType && params.listingType === SAUNA_LISTING_TYPE) {
       const draftURI = createResourceLocatorString(
         'EditListingPage',
         routes,
@@ -82,7 +84,6 @@ const redirectAfterDraftUpdate = (listingId, params, tab, marketplaceTabs, histo
         {}
       );
       history.replace(draftURI);
-      return;
     }
   }
 
@@ -155,7 +156,6 @@ const EditListingWizardTab = props => {
           if (tab !== marketplaceTabs[marketplaceTabs.length - 1]) {
             // Create listing flow: smooth scrolling polyfill to scroll to correct tab
             handleCreateFlowTabScrolling(false);
-
             // After successful saving of draft data, user should be redirected to next tab
             redirectAfterDraftUpdate(r.data.data.id.uuid, params, tab, marketplaceTabs, history);
           } else {
@@ -342,6 +342,25 @@ const EditListingWizardTab = props => {
 
       return (
         <EditListingPhotosPanel
+          {...panelProps(PHOTOS)}
+          submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
+          images={images}
+          onImageUpload={onImageUpload}
+          onRemoveImage={onRemoveImage}
+          onSubmit={values => {
+            onCompleteEditListingWizardTab(tab, values);
+          }}
+          onUpdateImageOrder={onUpdateImageOrder}
+        />
+      );
+    }
+    case EQUIPMENT_PHOTOS: {
+      const submitButtonTranslationKey = isNewListingFlow
+        ? 'EditListingWizard.saveNewPhotos'
+        : 'EditListingWizard.saveEditPhotos';
+
+      return (
+        <EditEquipmentListingPhotosPanel
           {...panelProps(PHOTOS)}
           submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
           images={images}

@@ -10,7 +10,7 @@ const SectionEquipmentTypesMaybe = props => {
     return null;
   }
 
-  const selectedOptions = publicData && publicData.equipmentCategory ? publicData.equipmentCategory : [];
+  const selectedOptions = publicData && publicData.equipmentTypes? publicData.equipmentTypes : [];
   return (
     <div className={css.sectionFeatures}>
       <h2 className={css.featuresTitle}>

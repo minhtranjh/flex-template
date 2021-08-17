@@ -75,11 +75,11 @@ export const filters = [
   },
   {
 
-    id : "equipmentCategory",
-    label : "Equipment Category",
+    id : "equipmentTypes",
+    label : "Equipment Types",
     type: 'SelectMultipleFilter',
     group : 'secondary',
-    queryParamNames : ['pub_equipmentCategory'],
+    queryParamNames : ['pub_equipmentTypes'],
     config : {
       searchMode: 'has_all',
       options: [

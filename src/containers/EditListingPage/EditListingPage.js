@@ -41,6 +41,7 @@ import {
 } from './EditListingPage.duck';
 
 import css from './EditListingPage.module.css';
+import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const STRIPE_ONBOARDING_RETURN_URL_SUCCESS = 'success';
 const STRIPE_ONBOARDING_RETURN_URL_FAILURE = 'failure';
@@ -108,25 +109,41 @@ export const EditListingPageComponent = props => {
     // If page has already listingId (after submit) and current listings exist
     // redirect to listing page
     const listingSlug = currentListing ? createSlug(currentListing.attributes.title) : null;
-
-    const redirectProps = isPendingApproval
-      ? {
+    const listingType = currentListing.attributes.publicData.listingType;
+    const redirectProps = () => {
+      if (isPendingApproval) {
+        return {
           name: 'ListingPageVariant',
           params: {
             id: listingId.uuid,
             slug: listingSlug,
             variant: LISTING_PAGE_PENDING_APPROVAL_VARIANT,
           },
-        }
-      : {
+        };
+      }
+      if (listingType === EQUIPMENT_LISTING_TYPE) {
+        return {
+          name: 'EquipmentListingPage',
+          params: {
+            id: listingId.uuid,
+            slug: listingSlug,
+            listingType: listingType,
+          },
+        };
+      }
+      if (listingType === SAUNA_LISTING_TYPE) {
+        return {
           name: 'ListingPage',
           params: {
             id: listingId.uuid,
             slug: listingSlug,
+            listingType: listingType,
           },
         };
+      }
+    };
 
-    return <NamedRedirect {...redirectProps} />;
+    return <NamedRedirect {...redirectProps()} />;
   } else if (showForm) {
     const {
       createListingDraftError = null,
@@ -163,7 +180,6 @@ export const EditListingPageComponent = props => {
     const images = allImages.filter(img => {
       return !removedImageIds.includes(img.id);
     });
-
     const title = isNewListingFlow
       ? intl.formatMessage({ id: 'EditListingPage.titleCreateListing' })
       : intl.formatMessage({ id: 'EditListingPage.titleEditListing' });

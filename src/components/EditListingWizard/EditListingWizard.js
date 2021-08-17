@@ -27,6 +27,7 @@ import EditListingWizardTab, {
   PRICING,
   PHOTOS,
   CAPACITY,
+  EQUIPMENT_PHOTOS,
 } from './EditListingWizardTab';
 import css from './EditListingWizard.module.css';
 
@@ -48,7 +49,13 @@ export const TABS = [
   PHOTOS,
 ];
 
-export const EQUIPMENT_TABS = [DESCRIPTION, LOCATION, PRICING, ...availabilityMaybe];
+export const EQUIPMENT_TABS = [
+  DESCRIPTION,
+  LOCATION,
+  PRICING,
+  ...availabilityMaybe,
+  EQUIPMENT_PHOTOS,
+];
 
 export const EQUIPMENT_LISTING_TYPE = 'equipment';
 export const SAUNA_LISTING_TYPE = 'sauna';
@@ -88,6 +95,8 @@ const tabLabel = (intl, tab) => {
     key = 'EditListingWizard.tabLabelPhotos';
   } else if (tab === CAPACITY) {
     key = 'EditListingWizard.tabLabelCapacity';
+  } else if (tab === EQUIPMENT_PHOTOS) {
+    key = 'EditListingWizard.tabLabelPhotos';
   }
 
   return intl.formatMessage({ id: key });
@@ -128,6 +137,8 @@ const tabCompleted = (tab, listing) => {
     case AVAILABILITY:
       return !!availabilityPlan;
     case PHOTOS:
+      return images && images.length > 0;
+    case EQUIPMENT_PHOTOS:
       return images && images.length > 0;
     default:
       return false;
