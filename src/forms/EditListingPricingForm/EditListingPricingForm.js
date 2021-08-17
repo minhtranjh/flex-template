@@ -11,6 +11,7 @@ import { formatMoney } from '../../util/currency';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { Button, Form, FieldCurrencyInput } from '../../components';
 import css from './EditListingPricingForm.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const { Money } = sdkTypes;
 
@@ -30,20 +31,24 @@ export const EditListingPricingFormComponent = props => (
         updated,
         updateInProgress,
         fetchErrors,
+        listingType,
       } = formRenderProps;
-
       const unitType = config.bookingUnitType;
       const isNightly = unitType === LINE_ITEM_NIGHT;
       const isDaily = unitType === LINE_ITEM_DAY;
-
-      const translationKey = isNightly
-        ? 'EditListingPricingForm.pricePerNight'
-        : isDaily
-        ? 'EditListingPricingForm.pricePerDay'
-        : 'EditListingPricingForm.pricePerUnit';
-
+      const translationKey = () => {
+        if (listingType === EQUIPMENT_LISTING_TYPE) {
+          return 'EditListingPricingForm.pricePerEquipment';
+        } else if (isDaily) {
+          ('EditListingPricingForm.pricePerDay');
+        } else if (isNightly) {
+          return 'EditListingPricingForm.pricePerNight';
+        } else {
+          return 'EditListingPricingForm.pricePerUnit';
+        }
+      };
       const pricePerUnitMessage = intl.formatMessage({
-        id: translationKey,
+        id: translationKey(),
       });
 
       const pricePlaceholderMessage = intl.formatMessage({
@@ -56,11 +61,11 @@ export const EditListingPricingFormComponent = props => (
         })
       );
       const cleaningFeeMessage = intl.formatMessage({
-        id : "EditListingPricingForm.cleaningFeeLabel"
-      })
+        id: 'EditListingPricingForm.cleaningFeeLabel',
+      });
       const cleaningFeePlaceholderMessage = intl.formatMessage({
-        id : "EditListingPricingForm.cleaningFeePlaceholder"
-      })
+        id: 'EditListingPricingForm.cleaningFeePlaceholder',
+      });
       const minPrice = new Money(config.listingMinimumPriceSubUnits, config.currency);
       const minPriceRequired = validators.moneySubUnitAmountAtLeast(
         intl.formatMessage(
@@ -82,7 +87,16 @@ export const EditListingPricingFormComponent = props => (
       const submitInProgress = updateInProgress;
       const submitDisabled = invalid || disabled || submitInProgress;
       const { updateListingError, showListingsError } = fetchErrors || {};
-
+      const cleaningFeeFiledMaybe = !listingType ? (
+        <FieldCurrencyInput
+          id="cleaningFee"
+          name="cleaningFee"
+          className={css.cleaningFeeInput}
+          label={cleaningFeeMessage}
+          placeholder={cleaningFeePlaceholderMessage}
+          currencyConfig={config.currencyConfig}
+        />
+      ) : null;
       return (
         <Form onSubmit={handleSubmit} className={classes}>
           {updateListingError ? (
@@ -105,15 +119,7 @@ export const EditListingPricingFormComponent = props => (
             currencyConfig={config.currencyConfig}
             validate={priceValidators}
           />
-
-          <FieldCurrencyInput
-            id="cleaningFee"
-            name="cleaningFee"
-            className={css.cleaningFeeInput}
-            label={cleaningFeeMessage}
-            placeholder={cleaningFeePlaceholderMessage}
-            currencyConfig={config.currencyConfig}
-          />
+          {cleaningFeeFiledMaybe}
           <Button
             className={css.submitButton}
             type="submit"

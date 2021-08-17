@@ -10,6 +10,7 @@ import { types as sdkTypes } from '../../util/sdkLoader';
 import config from '../../config';
 
 import css from './EditListingPricingPanel.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 const { Money } = sdkTypes;
 
@@ -26,11 +27,12 @@ const EditListingPricingPanel = props => {
     panelUpdated,
     updateInProgress,
     errors,
+    listingType,
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
   const currentListing = ensureOwnListing(listing);
-  const { price , cleaningFee } = currentListing.attributes;
+  const { price, cleaningFee } = currentListing.attributes;
   const cleaningFeeAsMoney = cleaningFee
     ? new Money(cleaningFee.amount, cleaningFee.currency)
     : null;
@@ -45,21 +47,36 @@ const EditListingPricingPanel = props => {
   ) : (
     <FormattedMessage id="EditListingPricingPanel.createListingTitle" />
   );
-
+  const handleSubmitListingPricing = values => {
+    if (listingType === EQUIPMENT_LISTING_TYPE) {
+      const { price } = values;
+      const updatedValues = {
+        price,
+        publicData: {},
+      };
+      onSubmit(updatedValues);
+      return;
+    }
+    if (listingType === SAUNA_LISTING_TYPE) {
+      const { price, cleaningFee = null } = values;
+      const updatedValues = {
+        price,
+        publicData: {
+          cleaningFee: { amount: cleaningFee.amount, currency: cleaningFee.currency },
+        },
+      };
+      onSubmit(updatedValues);
+      return;
+    }
+  };
   const priceCurrencyValid = price instanceof Money ? price.currency === config.currency : true;
   const form = priceCurrencyValid ? (
     <EditListingPricingForm
       className={css.form}
+      listingType={listingType}
       initialValues={initialValues}
       onSubmit={values => {
-        const { price, cleaningFee = null } = values;
-        const updatedValues = {
-          price,
-          publicData: {
-            cleaningFee: { amount: cleaningFee.amount, currency: cleaningFee.currency },
-          },
-        };
-        onSubmit(updatedValues);
+        handleSubmitListingPricing(values);
       }}
       onChange={onChange}
       saveActionMsg={submitButtonText}
