@@ -8,6 +8,7 @@ import { ListingLink } from '../../components';
 import { EditListingLocationForm } from '../../forms';
 
 import css from './EditListingLocationPanel.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 class EditListingLocationPanel extends Component {
   constructor(props) {
@@ -56,6 +57,7 @@ class EditListingLocationPanel extends Component {
       panelUpdated,
       updateInProgress,
       errors,
+      listingType,
     } = this.props;
 
     const classes = classNames(rootClassName || css.root, className);
@@ -63,18 +65,24 @@ class EditListingLocationPanel extends Component {
 
     const isPublished =
       currentListing.id && currentListing.attributes.state !== LISTING_STATE_DRAFT;
-    const panelTitle = isPublished ? (
-      <FormattedMessage
-        id="EditListingLocationPanel.title"
-        values={{ listingTitle: <ListingLink listing={listing} /> }}
-      />
-    ) : (
-      <FormattedMessage id="EditListingLocationPanel.createListingTitle" />
-    );
+    const panelTitle = () => {
+      if (isPublished) {
+        return (
+          <FormattedMessage
+            id="EditListingLocationPanel.title"
+            values={{ listingTitle: <ListingLink listing={listing} /> }}
+          />
+        );
+      } else if (listingType === EQUIPMENT_LISTING_TYPE) {
+        return <FormattedMessage id="EditListingLocationPanel.createEquipmentListingTitle" />;
+      } else {
+        return <FormattedMessage id="EditListingLocationPanel.createListingTitle" />;
+      }
+    };
 
     return (
       <div className={classes}>
-        <h1 className={css.title}>{panelTitle}</h1>
+        <h1 className={css.title}>{panelTitle()}</h1>
         <EditListingLocationForm
           className={css.form}
           initialValues={this.state.initialValues}
