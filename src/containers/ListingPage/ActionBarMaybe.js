@@ -12,6 +12,10 @@ import { NamedLink } from '../../components';
 import EditIcon from './EditIcon';
 
 import css from './ListingPage.module.css';
+import {
+  EQUIPMENT_LISTING_TYPE,
+  SAUNA_LISTING_TYPE,
+} from '../../components/EditListingWizard/EditListingWizard';
 
 export const ActionBarMaybe = props => {
   const { isOwnListing, listing, editParams } = props;
@@ -36,17 +40,23 @@ export const ActionBarMaybe = props => {
     const ownListingTextClasses = classNames(css.ownListingText, {
       [css.ownListingTextPendingApproval]: isPendingApproval,
     });
-
+    const listingType = editParams.listingType
+    const editRouteName = () => {
+      switch (listingType) {
+        case EQUIPMENT_LISTING_TYPE:
+          return 'EditEquipmentListingPage';
+        case SAUNA_LISTING_TYPE:
+          return 'EditListingPage';
+        default:
+          return 'EditListingPage';
+      }
+    };
     return (
       <div className={css.actionBar}>
         <p className={ownListingTextClasses}>
           <FormattedMessage id={ownListingTextTranslationId} />
         </p>
-        <NamedLink
-          className={css.editListingLink}
-          name={editParams.listingType ? 'EditEquipmentListingPage' : 'EditListingPage'}
-          params={editParams}
-        >
+        <NamedLink className={css.editListingLink} name={editRouteName()} params={editParams}>
           <EditIcon className={css.editIcon} />
           <FormattedMessage id={message} />
         </NamedLink>

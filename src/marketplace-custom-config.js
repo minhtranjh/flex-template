@@ -73,7 +73,7 @@ export const filters = [
     config: {
       min: 0,
       max: 50,
-      step: 1,
+      step: 2,
     },
   },
   {
@@ -90,20 +90,19 @@ export const filters = [
     config: {},
   },
   {
-
-    id : "equipmentTypes",
-    label : "Equipment Types",
+    id: 'equipmentTypes',
+    label: 'Equipment Types',
     type: 'SelectMultipleFilter',
-    group : 'secondary',
-    queryParamNames : ['pub_equipmentTypes'],
-    config : {
+    group: 'secondary',
+    queryParamNames: ['pub_equipmentTypes'],
+    config: {
       searchMode: 'has_all',
       options: [
         { key: 'math', label: 'Math' },
         { key: 'physics', label: 'Physics' },
         { key: 'chemistry', label: 'Chemistry' },
       ],
-    }
+    },
   },
   {
     id: 'category',

@@ -16,10 +16,14 @@
   display: block;
   float: left;
   position: relative;
-  width: 100%;
-  margin: 0;
+  margin-right: 6px;
   overflow: hidden;
+  width: 100%;
   background-color: var(--matterColorNegative); /* Loading BG color */
+  @media (--viewportLarge) {
+  width: calc(50% - 12px);
+
+  }
 }
 
 .threeToTwoWrapper {

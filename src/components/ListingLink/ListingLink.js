@@ -71,7 +71,12 @@ const ListingLink = props => {
         params: { id, slug,listingType },
       };
     }
+    return   {
+      name: 'ListingPage',
+      params: { id, slug },
+    };
   }
+
   return (
     <NamedLink className={className} {...linkProps()}>
       {children ? children : richTitle || ''}
