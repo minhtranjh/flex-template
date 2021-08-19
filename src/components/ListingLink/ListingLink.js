@@ -59,12 +59,6 @@ const ListingLink = props => {
         },
       }
     }
-    if(listingType===SAUNA_LISTING_TYPE){
-      return   {
-        name: 'ListingPage',
-        params: { id, slug },
-      };
-    }
     if(listingType===EQUIPMENT_LISTING_TYPE){
       return   {
         name: 'EquipmentListingPage',
