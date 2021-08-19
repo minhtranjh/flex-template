@@ -6,7 +6,6 @@ import { propTypes } from '../../util/types';
 import { formatCurrencyMajorUnit } from '../../util/currency';
 import config from '../../config';
 
-
 import css from './MaxUsingTimeADayFilterPlain.module.css';
 import MaxUsingTimeADayFilterForm from '../../forms/MaxUsingTimeADayFilterForm/MaxUsingTimeADayFilterForm';
 
@@ -34,8 +33,10 @@ const parse = maxUsingTimeADayRange => {
 const format = (range, queryParamName) => {
   const { minTime, maxTime } = range || {};
   // Note: we compare to null, because 0 as minPrice is falsy in comparisons.
-  const value = minTime != null && maxTime != null ? `${minTime},${maxTime}` : null;
-  return { [queryParamName]: value };
+  if (minTime !== maxTime) {
+    const value = minTime != null && maxTime != null ? `${minTime},${maxTime}` : null;
+    return { [queryParamName]: value };
+  }
 };
 class MaxUsingTimeADayFilterPlainComponent extends Component {
   constructor(props) {

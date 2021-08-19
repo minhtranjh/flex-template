@@ -5,10 +5,8 @@ import classNames from 'classnames';
 import config from '../../config';
 import { injectIntl, intlShape } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
-import { formatCurrencyMajorUnit } from '../../util/currency';
 
 import { OutsideClickHandler } from '..';
-import { PriceFilterForm } from '../../forms';
 import css from './MaxUsingTimeADayFilterPopup.module.css';
 import MaxUsingTimeADayFilterForm from '../../forms/MaxUsingTimeADayFilterForm/MaxUsingTimeADayFilterForm';
 
@@ -38,8 +36,10 @@ const parse = maxUsingTimeADayRange => {
 const format = (range, queryParamName) => {
   const { minTime, maxTime } = range || {};
   // Note: we compare to null, because 0 as minPrice is falsy in comparisons.
-  const value = minTime != null && maxTime != null ? `${minTime},${maxTime}` : null;
-  return { [queryParamName]: value };
+  if(minTime!==maxTime){
+    const value = minTime != null && maxTime != null ? `${minTime},${maxTime}` : null;
+    return { [queryParamName]: value };
+  }
 };
 
 class MaxUsingTimeADayFilterPopup extends Component {
