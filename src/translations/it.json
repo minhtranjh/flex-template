@@ -383,6 +383,11 @@
   "KeywordFilter.placeholder": "Enter a keyword…",
   "KeywordFilterPlainForm.labelSelected": "Keyword",
   "KeywordFilterPlainForm.placeholder": "Enter a keyword…",
+  "ManufactureYearKeywordFilter.filterText": "Filter results by",
+  "ManufactureYearKeywordFilter.labelSelected": "\"{labelText}\"",
+  "ManufactureYearKeywordFilter.placeholder": "Enter manufacture year",
+  "ManufactureYearKeywordFilterPlainForm.labelSelected": "Manufacture year",
+  
   "LandingPage.schemaDescription": "Book a sauna using Saunatime or earn some income by sharing your sauna",
   "LandingPage.schemaTitle": "Book saunas everywhere | {siteTitle}",
   "LayoutWrapperAccountSettingsSideNav.contactDetailsTabTitle": "Contact details",
@@ -1106,5 +1111,7 @@
   "UserCard.showFullBioLink": "more",
   "UserCard.viewProfileLink": "View profile",
   "UserDisplayName.banned": "Banned user",
-  "UserDisplayName.deleted": "Deleted user"
+  "UserDisplayName.deleted": "Deleted user",
+  "FieldDateTimeInput.startTime" : "Pick time",
+  "FieldDateTimeInput.endTime" : "Drop time"
 }

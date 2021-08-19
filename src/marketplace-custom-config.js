@@ -77,6 +77,19 @@ export const filters = [
     },
   },
   {
+    id: 'manufactureYear',
+    label: 'Manufacture Year',
+    type: 'ManufactureYearKeyWordFilter',
+    group: 'secondary',
+    // Note: KeywordFilter is fixed filter,
+    // you can't change "queryParamNames: ['keywords'],"
+    queryParamNames: ['pub_manufactureYear'],
+    // NOTE: If you are ordering search results by distance
+    // the keyword search can't be used at the same time.
+    // You can turn on/off ordering by distance from config.js file.
+    config: {},
+  },
+  {
     id: 'keyword',
     label: 'Keyword',
     type: 'KeywordFilter',
@@ -104,6 +117,7 @@ export const filters = [
       ],
     },
   },
+
   {
     id: 'category',
     label: 'Category',
