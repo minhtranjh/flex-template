@@ -11,7 +11,7 @@ const SectionMaxUsingTimeADay = props => {
       case 'equipment':
         return <FormattedMessage id="ListingPage.maxUsingTimeADayTitle" />;
       default:
-        return <FormattedMessage id="ListingPage.maxUsingTimeADayTitle" />;
+        return null;
     }
   };
   return maxUsingTimeADay ? (

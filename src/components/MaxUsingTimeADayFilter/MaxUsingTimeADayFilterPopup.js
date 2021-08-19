@@ -23,10 +23,17 @@ const getMaxUsingTimeADayQueryParamName = queryParamNames => {
 
 // Parse value, which should look like "0,1000"
 const parse = maxUsingTimeADayRange => {
+
   const [minTime, maxTime] = !!maxUsingTimeADayRange
     ? maxUsingTimeADayRange.split(',').map(v => Number.parseInt(v, RADIX))
     : [];
-  // Note: we compare to null, because 0 as minPrice is falsy in comparisons.
+
+  if(!maxTime){
+    return !!maxUsingTimeADayRange && minTime != null
+    ? { minTime, maxTime : minTime }
+    : null;
+  }
+    // Note: we compare to null, because 0 as minPrice is falsy in comparisons.
   return !!maxUsingTimeADayRange && minTime != null && maxTime != null
     ? { minTime, maxTime }
     : null;
@@ -40,6 +47,8 @@ const format = (range, queryParamName) => {
     const value = minTime != null && maxTime != null ? `${minTime},${maxTime}` : null;
     return { [queryParamName]: value };
   }
+  const value = minTime != null && maxTime != null ? `${minTime}` : null;
+  return { [queryParamName]: value };
 };
 
 class MaxUsingTimeADayFilterPopup extends Component {
