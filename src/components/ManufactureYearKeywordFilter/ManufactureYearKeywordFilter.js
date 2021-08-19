@@ -7,6 +7,7 @@ import { FieldTextInput } from '../../components';
 
 import { FilterPopup, FilterPlain } from '../../components';
 import css from './KeywordFilter.module.css';
+import * as validators from '../../util/validators';
 
 // When user types, we wait for new keystrokes a while before searching new content
 const DEBOUNCE_WAIT_TIME = 600;
@@ -100,7 +101,17 @@ class ManufactureYearKeywordFilter extends Component {
     const placeholder = intl.formatMessage({ id: 'ManufactureYearKeywordFilter.placeholder' });
 
     const contentStyle = this.positionStyleForContent();
-
+    const manufactureYearAtLeastMessage = intl.formatMessage(
+      {
+        id: 'ManufactureYearKeywordFilter.manufactureYearAtLeast',
+      },
+      { year: rest.min }
+    );
+    const manufactureYearAtLeast = validators.numberAtLeast(
+      manufactureYearAtLeastMessage,
+      rest.min
+    );
+    const manuFactureYearValidators = validators.composeValidators(manufactureYearAtLeast);
     // pass the initial values with the name key so that
     // they can be passed to the correct field
     const namedInitialValues = { [name]: initialValues[urlParam] };
@@ -165,6 +176,7 @@ class ManufactureYearKeywordFilter extends Component {
           id={`${id}-input`}
           type="number"
           label={filterText}
+          validate={manuFactureYearValidators}
           placeholder={placeholder}
           autoComplete="off"
         />
@@ -191,6 +203,7 @@ class ManufactureYearKeywordFilter extends Component {
             isUncontrolled
             inputRef={this.mobileInputRef}
             type="number"
+            validate={manuFactureYearValidators}
             placeholder={placeholder}
             autoComplete="off"
           />

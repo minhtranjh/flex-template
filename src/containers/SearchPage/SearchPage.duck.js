@@ -206,13 +206,24 @@ export const searchMapListings = searchParams => (dispatch, getState, sdk) => {
       throw e;
     });
 };
-
+export const getValidatedFilterOnly = (search, filterConfig) => {
+  const searchQuery = { ...search };
+  filterConfig.forEach(f => {
+    if (f.config && f.config.min && f.config.min > search[f.queryParamNames]) {
+      delete searchQuery[f.queryParamNames];
+    }
+  });
+  return searchQuery;
+};
 export const loadData = (params, search) => {
   const queryParams = parse(search, {
     latlng: ['origin'],
     latlngBounds: ['bounds'],
   });
-  const { page = 1, address, origin, ...rest } = queryParams;
+  const queryParamsValidated = getValidatedFilterOnly(queryParams, config.custom.filters);
+
+  const { page = 1, address, origin, ...rest } = queryParamsValidated;
+
   const originMaybe = config.sortSearchByDistance && origin ? { origin } : {};
   return searchListings({
     ...rest,
@@ -220,7 +231,7 @@ export const loadData = (params, search) => {
     page,
     perPage: RESULT_PAGE_SIZE,
     include: ['author', 'images'],
-    'fields.listing': ['title', 'geolocation', 'price','publicData'],
+    'fields.listing': ['title', 'geolocation', 'price', 'publicData'],
     'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
     'fields.image': ['variants.landscape-crop', 'variants.landscape-crop2x'],
     'limit.images': 1,

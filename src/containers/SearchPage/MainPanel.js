@@ -20,6 +20,7 @@ import FilterComponent from './FilterComponent';
 import { validFilterParams } from './SearchPage.helpers';
 
 import css from './SearchPage.module.css';
+import { getValidatedFilterOnly } from './SearchPage.duck';
 
 // Primary filters have their content in dropdown-popup.
 // With this offset we move the dropdown to the left a few pixels on desktop layout.
@@ -65,8 +66,8 @@ class MainPanel extends Component {
   applyFilters() {
     const { history, urlQueryParams, sortConfig, filterConfig } = this.props;
     const searchParams = { ...urlQueryParams, ...this.state.currentQueryParams };
-    const search = cleanSearchFromConflictingParams(searchParams, sortConfig, filterConfig);
-
+    const searchQuery = cleanSearchFromConflictingParams(searchParams, sortConfig, filterConfig);
+    const search = getValidatedFilterOnly(searchQuery, filterConfig);
     history.push(createResourceLocatorString('SearchPage', routeConfiguration(), {}, search));
   }
 
@@ -132,6 +133,7 @@ class MainPanel extends Component {
         if (useHistoryPush) {
           const searchParams = this.state.currentQueryParams;
           const search = cleanSearchFromConflictingParams(searchParams, sortConfig, filterConfig);
+
           history.push(createResourceLocatorString('SearchPage', routeConfiguration(), {}, search));
         }
       };

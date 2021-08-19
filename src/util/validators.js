@@ -136,6 +136,13 @@ export const ageAtLeast = (message, minYears) => value => {
   return message;
 };
 
+export const numberAtLeast = (message,minValues) => value=>{
+  if(value<=minValues){
+    return message;
+  }
+  return VALID
+}
+
 export const validBusinessURL = message => value => {
   if (typeof value === 'undefined' || value === null) {
     return message;

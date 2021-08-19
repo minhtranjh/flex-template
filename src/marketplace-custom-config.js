@@ -73,7 +73,7 @@ export const filters = [
     config: {
       min: 0,
       max: 50,
-      step: 2,
+      step: 1,
     },
   },
   {
@@ -87,7 +87,9 @@ export const filters = [
     // NOTE: If you are ordering search results by distance
     // the keyword search can't be used at the same time.
     // You can turn on/off ordering by distance from config.js file.
-    config: {},
+    config: {
+      min : 2010,
+    },
   },
   {
     id: 'keyword',
