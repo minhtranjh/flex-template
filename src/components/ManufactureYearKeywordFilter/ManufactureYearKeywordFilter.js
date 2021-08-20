@@ -19,7 +19,7 @@ const getKeywordQueryParam = queryParamNames => {
     ? queryParamNames[0]
     : typeof queryParamNames === 'string'
     ? queryParamNames
-    : 'keywords';
+    : 'pub_manufactureYear';
 };
 
 class ManufactureYearKeywordFilter extends Component {

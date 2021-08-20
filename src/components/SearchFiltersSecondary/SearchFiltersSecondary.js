@@ -21,11 +21,12 @@ class SearchFiltersSecondaryComponent extends Component {
     const { applyFilters, onClosePanel } = this.props;
 
     if (applyFilters) {
-      applyFilters();
+      const result = applyFilters();
+      result && onClosePanel()
     }
+    
 
     // Ensure that panel closes (if now changes have been made)
-    onClosePanel();
   }
 
   // Close the filters by clicking cancel, revert to the initial params

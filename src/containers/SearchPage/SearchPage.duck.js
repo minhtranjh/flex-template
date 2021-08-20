@@ -206,23 +206,28 @@ export const searchMapListings = searchParams => (dispatch, getState, sdk) => {
       throw e;
     });
 };
-export const getValidatedFilterOnly = (search, filterConfig) => {
+export const isFilterInValid = (search, filterConfig) => {
   const searchQuery = { ...search };
-  filterConfig.forEach(f => {
-    if (f.config && f.config.min && f.config.min > search[f.queryParamNames]) {
-      delete searchQuery[f.queryParamNames];
+  const result = filterConfig.some(f => {
+    if (
+      f.config &&
+      f.config.min &&
+      searchQuery[f.queryParamNames] &&
+      Number(f.config.min) > Number(searchQuery[f.queryParamNames])
+    ) {
+      return true;
     }
+    return false;
   });
-  return searchQuery;
+  return result;
 };
 export const loadData = (params, search) => {
   const queryParams = parse(search, {
     latlng: ['origin'],
     latlngBounds: ['bounds'],
   });
-  const queryParamsValidated = getValidatedFilterOnly(queryParams, config.custom.filters);
 
-  const { page = 1, address, origin, ...rest } = queryParamsValidated;
+  const { page = 1, address, origin, ...rest } = queryParams;
 
   const originMaybe = config.sortSearchByDistance && origin ? { origin } : {};
   return searchListings({
