@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import config from '../../config';
 import routeConfiguration from '../../routeConfiguration';
 import { pathByRouteName, findRouteByRouteName } from '../../util/routes';
-import { propTypes, LINE_ITEM_NIGHT, LINE_ITEM_DAY, DATE_TYPE_DATE } from '../../util/types';
+import { propTypes, LINE_ITEM_NIGHT, LINE_ITEM_DAY, DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
 import {
   ensureListing,
   ensureCurrentUser,
@@ -188,7 +188,7 @@ export class CheckoutPageComponent extends Component {
       // a noon of correct year-month-date combo in UTC
       const bookingStartForAPI = dateFromLocalToAPI(bookingStart);
       const bookingEndForAPI = dateFromLocalToAPI(bookingEnd);
-
+      
       // Fetch speculated transaction for showing price in booking breakdown
       // NOTE: if unit type is line-item/units, quantity needs to be added.
       // The way to pass it to checkout page is through pageData.bookingData
@@ -506,7 +506,6 @@ export class CheckoutPageComponent extends Component {
       retrievePaymentIntentError,
       stripeCustomerFetched,
     } = this.props;
-
     // Since the listing data is already given from the ListingPage
     // and stored to handle refreshes, it might not have the possible
     // deleted or closed information in it. If the transaction
@@ -520,8 +519,10 @@ export class CheckoutPageComponent extends Component {
     const isLoading = !this.state.dataLoaded || speculateTransactionInProgress;
 
     const { listing, bookingDates, transaction } = this.state.pageData;
+
     const existingTransaction = ensureTransaction(transaction);
     const speculatedTransaction = ensureTransaction(speculatedTransactionMaybe, {}, null);
+
     const currentListing = ensureListing(listing);
     const currentAuthor = ensureUser(currentListing.author);
 
@@ -582,7 +583,9 @@ export class CheckoutPageComponent extends Component {
     // Show breakdown only when speculated transaction and booking are loaded
     // (i.e. have an id)
     const tx = existingTransaction.booking ? existingTransaction : speculatedTransaction;
+
     const txBooking = ensureBooking(tx.booking);
+
     const breakdown =
       tx.id && txBooking.id ? (
         <BookingBreakdown
@@ -591,7 +594,7 @@ export class CheckoutPageComponent extends Component {
           unitType={config.bookingUnitType}
           transaction={tx}
           booking={txBooking}
-          dateType={DATE_TYPE_DATE}
+          dateType={DATE_TYPE_DATETIME}
         />
       ) : null;
 

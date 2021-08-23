@@ -386,6 +386,7 @@
   "ManufactureYearKeywordFilter.filterText": "Filter results by",
   "ManufactureYearKeywordFilter.labelSelected": "\"{labelText}\"",
   "ManufactureYearKeywordFilter.placeholder": "Enter manufacture year",
+  "ManufactureYearKeywordFilter.manufactureYearAtLeast" : "Manufacture year at least from {year}",
   "ManufactureYearKeywordFilterPlainForm.labelSelected": "Manufacture year",
   
   "LandingPage.schemaDescription": "Book a sauna using Saunatime or earn some income by sharing your sauna",
@@ -1113,5 +1114,14 @@
   "UserDisplayName.banned": "Banned user",
   "UserDisplayName.deleted": "Deleted user",
   "FieldDateTimeInput.startTime" : "Pick time",
-  "FieldDateTimeInput.endTime" : "Drop time"
+  "FieldDateTimeInput.endTime" : "Drop time",
+  "BookingTimeForm.listingPriceMissing" : "Listing price does not exists",
+  "BookingTimeForm.listingCurrencyInvalid" : "Curreny is not valid",
+  "BookingTimeForm.bookingStartTitle" :"Pick up",
+  "BookingTimeForm.bookingEndTitle" : "Drop off",
+  "BookingTimeForm.priceBreakdownTitle" : "Breaking down price",
+  "BookingTimeForm.ownListing" : "You cannot book your own listing",
+  "BookingTimeForm.requestToBook" :"Request to book",
+  "BookingTimeForm.requiredDate" : "Date is required",
+  "FieldDateInput.placeholder" : "Pick a date"
 }

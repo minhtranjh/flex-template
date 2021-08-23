@@ -423,6 +423,7 @@ export class ListingPageComponent extends Component {
                   slug: listingSlug,
                   type: listingType,
                   tab: listingTab,
+                  listingType : currentListing.attributes.publicData.listingType ? currentListing.attributes.publicData.listingType : "sauna"
                 }}
                 imageCarouselOpen={this.state.imageCarouselOpen}
                 onImageCarouselClose={() => this.setState({ imageCarouselOpen: false })}

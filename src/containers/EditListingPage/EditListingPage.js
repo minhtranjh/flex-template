@@ -109,7 +109,7 @@ export const EditListingPageComponent = props => {
     // If page has already listingId (after submit) and current listings exist
     // redirect to listing page
     const listingSlug = currentListing ? createSlug(currentListing.attributes.title) : null;
-    const listingType = currentListing.attributes.publicData.listingType;
+    const listingType = currentListing.attributes.publicData.listingType ?  currentListing.attributes.publicData.listingType  : 'sauna';
     const redirectProps = () => {
       if (isPendingApproval) {
         return {

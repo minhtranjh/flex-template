@@ -1,0 +1,15 @@
+.bookingDates {
+    flex-shrink: 0;
+    margin-bottom: 38px;
+    /* Ensure that calendar dropdown gets some stacking context relative to other form items below */
+  }
+  .formRow{
+  
+  }
+
+  .field{
+    flex:1;
+  }
+  .selectGroup input{
+    margin-bottom: 10px;
+  }

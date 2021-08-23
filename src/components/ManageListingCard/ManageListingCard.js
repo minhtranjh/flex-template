@@ -38,6 +38,7 @@ import {
 import MenuIcon from './MenuIcon';
 import Overlay from './Overlay';
 import css from './ManageListingCard.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 // Menu content needs the same padding
 const MENU_CONTENT_OFFSET = -12;
@@ -84,7 +85,7 @@ const createListingURL = (routes, listing) => {
             listingType,
           },
         }
-      : listingType
+      : listingType===EQUIPMENT_LISTING_TYPE
       ? {
           name: 'EquipmentListingPage',
           params: { id, slug, listingType },

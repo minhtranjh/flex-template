@@ -11,7 +11,7 @@ import { formatMoney } from '../../util/currency';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { Button, Form, FieldCurrencyInput } from '../../components';
 import css from './EditListingPricingForm.module.css';
-import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
+import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const { Money } = sdkTypes;
 
@@ -87,7 +87,7 @@ export const EditListingPricingFormComponent = props => (
       const submitInProgress = updateInProgress;
       const submitDisabled = invalid || disabled || submitInProgress;
       const { updateListingError, showListingsError } = fetchErrors || {};
-      const cleaningFeeFiledMaybe = !listingType ? (
+      const cleaningFeeFiledMaybe = listingType===SAUNA_LISTING_TYPE ? (
         <FieldCurrencyInput
           id="cleaningFee"
           name="cleaningFee"

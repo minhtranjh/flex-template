@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { array, arrayOf, bool, func, shape, string, oneOf } from 'prop-types';
+import { array, arrayOf, bool, func, shape, string, oneOf,object } from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -41,7 +41,12 @@ import {
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '..';
 
-import { sendEnquiry, fetchTransactionLineItems, setInitialValues } from './ListingPage.duck';
+import {
+  sendEnquiry,
+  fetchTransactionLineItems,
+  setInitialValues,
+  fetchTimeSlots,
+} from './EquipmentListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
@@ -53,6 +58,7 @@ import css from './ListingPage.module.css';
 import SectionEquipmentTypesMaybe from './SectionEquipmentTypesMaybe';
 import SectionManufactureYearMaybe from './SectionManufactureYearMaybe';
 import SectionMaxUsingTimeADay from './SectionMaxUsingTimeADay';
+import BookingTimePanel from '../../components/BookingTimePanel/BookingTimePanel';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -189,7 +195,8 @@ export class EquipmentListingPageComponent extends Component {
       sendEnquiryInProgress,
       sendEnquiryError,
       timeSlots,
-      fetchTimeSlotsError,
+      monthlyTimeSlots,
+      onFetchTimeSlots,
       filterConfig,
       onFetchTransactionLineItems,
       lineItems,
@@ -361,7 +368,6 @@ export class EquipmentListingPageComponent extends Component {
       { id: 'ListingPage.schemaTitle' },
       { title, price: formattedPrice, siteTitle }
     );
-
     const hostLink = (
       <NamedLink
         className={css.authorNameLink}
@@ -372,7 +378,6 @@ export class EquipmentListingPageComponent extends Component {
         {authorDisplayName}
       </NamedLink>
     );
-
     const equipmentTypeOptions = findOptionsForSelectFilter('equipmentTypes', filterConfig);
     return (
       <Page
@@ -403,7 +408,9 @@ export class EquipmentListingPageComponent extends Component {
                   id: listingId.uuid,
                   slug: listingSlug,
                   type: listingType,
-                  listingType : currentListing.attributes.publicData.listingType,
+                  listingType: currentListing.attributes.publicData.listingType
+                    ? currentListing.attributes.publicData.listingType
+                    : null,
                   tab: listingTab,
                 }}
                 imageCarouselOpen={this.state.imageCarouselOpen}
@@ -459,18 +466,19 @@ export class EquipmentListingPageComponent extends Component {
                     onManageDisableScrolling={onManageDisableScrolling}
                   />
                 </div>
-                <BookingPanel
+                <BookingTimePanel
                   className={css.bookingPanel}
                   listing={currentListing}
                   isOwnListing={isOwnListing}
+                  bookingSubTitle={bookingSubTitle}
                   unitType={unitType}
                   onSubmit={handleBookingSubmit}
                   title={bookingTitle}
-                  subTitle={bookingSubTitle}
                   authorDisplayName={authorDisplayName}
                   onManageDisableScrolling={onManageDisableScrolling}
+                  monthlyTimeSlots={monthlyTimeSlots}
+                  onFetchTimeSlots={onFetchTimeSlots}
                   timeSlots={timeSlots}
-                  fetchTimeSlotsError={fetchTimeSlotsError}
                   onFetchTransactionLineItems={onFetchTransactionLineItems}
                   lineItems={lineItems}
                   fetchLineItemsInProgress={fetchLineItemsInProgress}
@@ -487,7 +495,6 @@ export class EquipmentListingPageComponent extends Component {
     );
   }
 }
-
 EquipmentListingPageComponent.defaultProps = {
   unitType: config.bookingUnitType,
   currentUser: null,
@@ -495,8 +502,7 @@ EquipmentListingPageComponent.defaultProps = {
   showListingError: null,
   reviews: [],
   fetchReviewsError: null,
-  timeSlots: null,
-  fetchTimeSlotsError: null,
+  monthlyTimeSlots: null,
   sendEnquiryError: null,
   filterConfig: config.custom.filters,
   lineItems: null,
@@ -533,8 +539,15 @@ EquipmentListingPageComponent.propTypes = {
   callSetInitialValues: func.isRequired,
   reviews: arrayOf(propTypes.review),
   fetchReviewsError: propTypes.error,
-  timeSlots: arrayOf(propTypes.timeSlot),
-  fetchTimeSlotsError: propTypes.error,
+  monthlyTimeSlots: object,
+  // monthlyTimeSlots could be something like:
+  // monthlyTimeSlots: {
+  //   '2019-11': {
+  //     timeSlots: [],
+  //     fetchTimeSlotsInProgress: false,
+  //     fetchTimeSlotsError: null,
+  //   }
+  // }
   sendEnquiryInProgress: bool.isRequired,
   sendEnquiryError: propTypes.error,
   onSendEnquiry: func.isRequired,
@@ -604,6 +617,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(fetchTransactionLineItems(bookingData, listingId, isOwnListing)),
   onSendEnquiry: (listingId, message) => dispatch(sendEnquiry(listingId, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
+  onFetchTimeSlots: (listingId, start, end, timeZone) =>
+  dispatch(fetchTimeSlots(listingId, start, end, timeZone)),
 });
 
 // Note: it is important that the withRouter HOC is **outside** the

@@ -10,7 +10,7 @@ import { types as sdkTypes } from '../../util/sdkLoader';
 import config from '../../config';
 
 import css from './EditListingPricingPanel.module.css';
-import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
+import { EQUIPMENT_LISTING_TYPE, SAUNA_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 const { Money } = sdkTypes;
 
@@ -62,13 +62,17 @@ const EditListingPricingPanel = props => {
       const updatedValues = {
         price,
         publicData: {
-          cleaningFee: { amount: cleaningFee.amount, currency: cleaningFee.currency },
+          cleaningFee: {
+            amount: cleaningFee ? cleaningFee.amount : null,
+            currency: cleaningFee ? cleaningFee.currency : null,
+          },
         },
       };
       onSubmit(updatedValues);
       return;
     }
   };
+
   const priceCurrencyValid = price instanceof Money ? price.currency === config.currency : true;
   const form = priceCurrencyValid ? (
     <EditListingPricingForm

@@ -94,7 +94,7 @@ const routeConfiguration = () => {
       path: '/l/:listingType/:slug/:id',
       name: 'EquipmentListingPage',
       component: EquipmentListingPage,
-      loadData: pageDataLoadingAPI.ListingPage.loadData,
+      loadData: pageDataLoadingAPI.EquipmentListingPage.loadData,
     },
     {
       path: '/l/:listingType/:slug/:id/checkout',

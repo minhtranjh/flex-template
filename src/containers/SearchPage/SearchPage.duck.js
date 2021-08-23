@@ -221,13 +221,28 @@ export const isFilterInValid = (search, filterConfig) => {
   });
   return result;
 };
+export const getValidatedFilterOnly = (search, filterConfig) => {
+  const searchQuery = { ...search };
+  filterConfig.forEach(f => {
+    if (
+      f.config &&
+      f.config.min &&
+      searchQuery[f.queryParamNames] &&
+      Number(f.config.min) > Number(searchQuery[f.queryParamNames])
+    ) {
+      delete searchQuery[f.queryParamNames]
+    }
+  });
+  return searchQuery;
+};
+
 export const loadData = (params, search) => {
   const queryParams = parse(search, {
     latlng: ['origin'],
     latlngBounds: ['bounds'],
   });
-
-  const { page = 1, address, origin, ...rest } = queryParams;
+  const query = getValidatedFilterOnly(queryParams,config.custom.filters)
+  const { page = 1, address, origin, ...rest } = query;
 
   const originMaybe = config.sortSearchByDistance && origin ? { origin } : {};
   return searchListings({

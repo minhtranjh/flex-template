@@ -216,11 +216,13 @@ class DateRangeInputComponent extends Component {
       children,
       render,
       timeSlots,
+      canHourlyBooking,
       ...datePickerProps
     } = this.props;
     /* eslint-enable no-unused-vars */
 
     const isDaily = unitType === LINE_ITEM_DAY;
+    const minimumNights = canHourlyBooking ? 0 : isDaily ? 0 : 1;
     const initialStartMoment = initialDates ? moment(initialDates.startDate) : null;
     const initialEndMoment = initialDates ? moment(initialDates.endDate) : null;
     const startDate =
@@ -272,7 +274,7 @@ class DateRangeInputComponent extends Component {
           onFocusChange={this.onFocusChange}
           startDate={startDate}
           endDate={endDate}
-          minimumNights={isDaily ? 0 : 1}
+          minimumNights={minimumNights}
           onDatesChange={this.onDatesChange}
           startDatePlaceholderText={startDatePlaceholderTxt}
           endDatePlaceholderText={endDatePlaceholderTxt}

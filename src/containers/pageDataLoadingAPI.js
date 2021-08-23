@@ -16,7 +16,7 @@ import {
   loadData as TransactionPageLoader,
   setInitialValues as TransactionPageInitialValues,
 } from './TransactionPage/TransactionPage.duck';
-
+import { loadData as EquipmentListingPageLoader } from './ListingPage/EquipmentListingPage.duck';
 const getPageDataLoadingAPI = () => {
   return {
     CheckoutPage: {
@@ -36,6 +36,9 @@ const getPageDataLoadingAPI = () => {
     },
     ListingPage: {
       loadData: ListingPageLoader,
+    },
+    EquipmentListingPage: {
+      loadData: EquipmentListingPageLoader,
     },
     ManageListingsPage: {
       loadData: ManageListingsPageLoader,
