@@ -136,6 +136,7 @@ const BookingTimePanel = props => {
           <BookingTimeForm
             className={css.bookingForm}
             formId="BookingTimePanel"
+            intl={intl}
             submitButtonWrapperClassName={css.bookingDatesSubmitButtonWrapper}
             unitType={unitType}
             onSubmit={onSubmit}

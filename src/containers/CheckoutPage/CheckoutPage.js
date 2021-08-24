@@ -8,7 +8,13 @@ import classNames from 'classnames';
 import config from '../../config';
 import routeConfiguration from '../../routeConfiguration';
 import { pathByRouteName, findRouteByRouteName } from '../../util/routes';
-import { propTypes, LINE_ITEM_NIGHT, LINE_ITEM_DAY, DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
+import {
+  propTypes,
+  LINE_ITEM_NIGHT,
+  LINE_ITEM_DAY,
+  DATE_TYPE_DATE,
+  DATE_TYPE_DATETIME,
+} from '../../util/types';
 import {
   ensureListing,
   ensureCurrentUser,
@@ -183,12 +189,12 @@ export class CheckoutPageComponent extends Component {
       const listingId = pageData.listing.id;
       const transactionId = tx ? tx.id : null;
       const { bookingStart, bookingEnd } = pageData.bookingDates;
-
+      const { displayStart, displayEnd } = pageData.bookingData.bookingDisplay;
       // Convert picked date to date that will be converted on the API as
       // a noon of correct year-month-date combo in UTC
       const bookingStartForAPI = dateFromLocalToAPI(bookingStart);
       const bookingEndForAPI = dateFromLocalToAPI(bookingEnd);
-      
+
       // Fetch speculated transaction for showing price in booking breakdown
       // NOTE: if unit type is line-item/units, quantity needs to be added.
       // The way to pass it to checkout page is through pageData.bookingData
@@ -197,6 +203,8 @@ export class CheckoutPageComponent extends Component {
           listingId,
           bookingStart: bookingStartForAPI,
           bookingEnd: bookingEndForAPI,
+          bookingDisplayStart: displayStart,
+          bookingDisplayEnd: displayEnd,
         },
         transactionId
       );
@@ -379,6 +387,8 @@ export class CheckoutPageComponent extends Component {
       listingId: pageData.listing.id,
       bookingStart: tx.booking.attributes.start,
       bookingEnd: tx.booking.attributes.end,
+      bookingDisplayStart: tx.booking.attributes.displayStart,
+      bookingDisplayEnd: tx.booking.attributes.displayEnd,
       ...optionalPaymentParams,
     };
 

@@ -20,9 +20,8 @@ import {
   FieldSelect,
 } from '../../components';
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
-
+import FieldDateAndTimeInput from './FieldDateAndTimeInput';
 import css from './BookingTimeForm.module.css';
-import FieldDateAndTimeRangeInput from '../../components/FieldDateAndTimeRangeInput/FieldDateAndTimeRangeInput';
 
 const identity = v => v;
 const { Money } = sdkTypes;
@@ -46,11 +45,11 @@ export class BookingTimeFormComponent extends Component {
   // focus on that input, otherwise continue with the
   // default handleSubmit function.
   handleFormSubmit(e) {
-    const { startDate, endDate } = e.bookingDates || {};
-    if (!startDate) {
+    const { bookingStartDate, bookingEndDate } = e || {};
+    if (!bookingStartDate) {
       e.preventDefault();
       this.setState({ focusedInput: START_DATE });
-    } else if (!endDate) {
+    } else if (!bookingEndDate) {
       e.preventDefault();
       this.setState({ focusedInput: END_DATE });
     } else {
@@ -63,8 +62,16 @@ export class BookingTimeFormComponent extends Component {
   // In case you add more fields to the form, make sure you add
   // the values here to the bookingData object.
   handleOnChange(formValues) {
-    const { startDate, endDate } =
-      formValues.values && formValues.values.bookingDates ? formValues.values.bookingDates : {};
+    const startDate =
+      formValues.values &&
+      formValues.values.bookingStartDate &&
+      formValues.values.bookingStartDate.date
+        ? formValues.values.bookingStartDate.date
+        : null;
+    const endDate =
+      formValues.values && formValues.values.bookingEndDate && formValues.values.bookingEndDate.date
+        ? formValues.values.bookingEndDate.date
+        : null;
     const startTime =
       formValues.values && formValues.values.bookingStartTime
         ? formValues.values.bookingStartTime
@@ -73,12 +80,29 @@ export class BookingTimeFormComponent extends Component {
       formValues.values && formValues.values.bookingEndTime
         ? formValues.values.bookingEndTime
         : null;
+    const bookingDisplayStart =
+      formValues.values && formValues.values.bookingDisplayStart
+        ? formValues.values.bookingDisplayStart
+        : null;
+    const bookingDisplayEnd =
+      formValues.values && formValues.values.bookingDisplayEnd
+        ? formValues.values.bookingDisplayEnd
+        : null;
 
     const listingId = this.props.listingId;
     const isOwnListing = this.props.isOwnListing;
-    if (startDate && endDate && startTime && endTime && !this.props.fetchLineItemsInProgress) {
+    const isSameDate = startDate === endDate
+    if (
+      startDate &&
+      endDate &&
+      startTime &&
+      endTime &&
+      bookingDisplayEnd &&
+      bookingDisplayStart && !isSameDate&&
+      !this.props.fetchLineItemsInProgress
+    ) {
       this.props.onFetchTransactionLineItems({
-        bookingData: { startDate, endDate },
+        bookingData: { startDate, endDate, bookingDisplayStart, bookingDisplayEnd },
         listingId,
         isOwnListing,
       });
@@ -127,16 +151,20 @@ export class BookingTimeFormComponent extends Component {
             form,
             fetchTimeSlotsError,
             lineItems,
+            pristine,
             fetchLineItemsInProgress,
             fetchLineItemsError,
-            canHourlyBooking
+            canHourlyBooking,
+            listingId,
+            onFetchTimeSlots,
           } = fieldRenderProps;
 
-          const { startDate, endDate } = values && values.bookingDates ? values.bookingDates : {};
-          const { startTime, endTime } =
-            values && values.bookingStartTime && values.bookingEndTime
-              ? { startTime: values.bookingStartTime, endTime: values.bookingEndTime }
-              : {};
+          const startDate = values && values.bookingStartDate ? values.bookingStartDate : {};
+          const endDate = values && values.bookingEndDate ? values.bookingEndDate : {};
+          const displayStart =
+            values && values.bookingDisplayStart ? values.bookingDisplayStart : null;
+          const displayEnd = values && values.bookingDisplayEnd ? values.bookingDisplayEnd : null;
+
           const bookingStartLabel = intl.formatMessage({
             id: 'BookingTimeForm.bookingStartTitle',
           });
@@ -164,13 +192,13 @@ export class BookingTimeFormComponent extends Component {
           // If you have added new fields to the form that will affect to pricing,
           // you need to add the values to handleOnChange function
           const bookingData =
-            startDate && endDate && startTime && endTime
+            startDate && endDate && displayStart && displayEnd
               ? {
                   unitType,
-                  startDate,
-                  endDate,
-                  startTime,
-                  endTime,
+                  startDate : startDate.date,
+                  endDate : endDate.date,
+                  displayStart,
+                  displayEnd,
                 }
               : null;
 
@@ -214,6 +242,19 @@ export class BookingTimeFormComponent extends Component {
           const submitButtonClasses = classNames(
             submitButtonWrapperClassName || css.submitButtonWrapper
           );
+          const startDateInputProps = {
+            label: bookingStartLabel,
+            placeholderText: startDatePlaceholder,
+          };
+          const endDateInputProps = {
+            label: bookingEndLabel,
+            placeholderText: endDatePlaceholder,
+          };
+
+          const dateInputProps = {
+            startDateInputProps,
+            endDateInputProps,
+          };
 
           return (
             <Form onSubmit={handleSubmit} className={classes} enforcePagePreloadFor="CheckoutPage">
@@ -224,26 +265,24 @@ export class BookingTimeFormComponent extends Component {
                   this.handleOnChange(values);
                 }}
               />
-              <FieldDateAndTimeRangeInput
+              <FieldDateAndTimeInput
+                {...dateInputProps}
                 startDate={startDate}
                 endDate={endDate}
-                canHourlyBooking={canHourlyBooking}
-                focusedInput={this.state.focusedInput}
-                bookingStartLabel={bookingStartLabel}
-                bookingEndLabel={bookingEndLabel}
-                startDatePlaceholderText={startDatePlaceholderText}
-                endDatePlaceholderText={endDatePlaceholderText}
-                requiredMessage={requiredMessage}
-                timeSlots={timeSlots}
-                startDateErrorMessage={startDateErrorMessage}
-                format={identity}
-                onFocusedInputChange={this.onFocusedInputChange}
                 formId={formId}
+                className={css.bookingDates}
+                listingId={listingId}
+                bookingStartLabel={bookingStartLabel}
+                onFetchTimeSlots={onFetchTimeSlots}
+                timeSlots={timeSlots}
+                values={values}
+                intl={intl}
                 form={form}
-                endDateErrorMessage={endDateErrorMessage}
+                pristine={pristine}
+                timeZone={'Asia/Sai_gon'}
                 startDateErrorMessage={startDateErrorMessage}
-                unitType={unitType}
-                fetchLineItemsInProgress={fetchLineItemsInProgress}
+                endDateErrorMessage={endDateErrorMessage}
+                requiredMessage={requiredMessage}
               />
               {bookingInfoMaybe}
               {loadingSpinnerMaybe}

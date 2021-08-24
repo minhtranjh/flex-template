@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { array, arrayOf, bool, func, shape, string, oneOf,object } from 'prop-types';
+import { array, arrayOf, bool, func, shape, string, oneOf, object } from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import config from '../../config';
 import routeConfiguration from '../../routeConfiguration';
 import { findOptionsForSelectFilter } from '../../util/search';
@@ -59,6 +59,7 @@ import SectionEquipmentTypesMaybe from './SectionEquipmentTypesMaybe';
 import SectionManufactureYearMaybe from './SectionManufactureYearMaybe';
 import SectionMaxUsingTimeADay from './SectionMaxUsingTimeADay';
 import BookingTimePanel from '../../components/BookingTimePanel/BookingTimePanel';
+import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -379,6 +380,11 @@ export class EquipmentListingPageComponent extends Component {
       </NamedLink>
     );
     const equipmentTypeOptions = findOptionsForSelectFilter('equipmentTypes', filterConfig);
+    if (
+      currentListing.attributes.publicData.listingType !== EQUIPMENT_LISTING_TYPE
+    ) {
+      return <Redirect to={`/l/${listingSlug}/${currentListing.id.uuid}`} />;
+    }
     return (
       <Page
         title={schemaTitle}
@@ -440,11 +446,11 @@ export class EquipmentListingPageComponent extends Component {
                   />
                   <SectionManufactureYearMaybe
                     manufactureYear={currentListing.attributes.publicData.manufactureYear}
-                    listingType={listingType}
+                    listingType={currentListing.attributes.publicData.listingType}
                   />
                   <SectionMaxUsingTimeADay
                     maxUsingTimeADay={currentListing.attributes.publicData.maxUsingTimeADay}
-                    listingType={listingType}
+                    listingType={currentListing.attributes.publicData.listingType}
                   />
                   <SectionMapMaybe
                     geolocation={geolocation}
@@ -467,6 +473,7 @@ export class EquipmentListingPageComponent extends Component {
                   />
                 </div>
                 <BookingTimePanel
+                intl={intl}
                   className={css.bookingPanel}
                   listing={currentListing}
                   isOwnListing={isOwnListing}
@@ -476,7 +483,6 @@ export class EquipmentListingPageComponent extends Component {
                   title={bookingTitle}
                   authorDisplayName={authorDisplayName}
                   onManageDisableScrolling={onManageDisableScrolling}
-                  monthlyTimeSlots={monthlyTimeSlots}
                   onFetchTimeSlots={onFetchTimeSlots}
                   timeSlots={timeSlots}
                   onFetchTransactionLineItems={onFetchTransactionLineItems}
@@ -617,8 +623,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(fetchTransactionLineItems(bookingData, listingId, isOwnListing)),
   onSendEnquiry: (listingId, message) => dispatch(sendEnquiry(listingId, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
-  onFetchTimeSlots: (listingId, start, end, timeZone) =>
-  dispatch(fetchTimeSlots(listingId, start, end, timeZone)),
+  onFetchTimeSlots: (listingId, start, end) =>
+    dispatch(fetchTimeSlots(listingId, start, end)),
 });
 
 // Note: it is important that the withRouter HOC is **outside** the

@@ -25,106 +25,115 @@
  * currently the API doesn't support that for logged out users, and we
  * are forced to estimate the information here.
  */
- import React from 'react';
- import Decimal from 'decimal.js';
- import { types as sdkTypes } from '../../util/sdkLoader';
- import { TRANSITION_REQUEST_PAYMENT, TX_TRANSITION_ACTOR_CUSTOMER } from '../../util/transaction';
- import { unitDivisor, convertMoneyToNumber, convertUnitToSubUnit } from '../../util/currency';
- import config from '../../config';
- import { BookingBreakdown } from '../../components';
- 
- import css from './BookingTimeForm.module.css';
- 
- const { Money, UUID } = sdkTypes;
- 
- const estimatedTotalPrice = lineItems => {
-   const numericTotalPrice = lineItems.reduce((sum, lineItem) => {
-     const numericPrice = convertMoneyToNumber(lineItem.lineTotal);
-     return new Decimal(numericPrice).add(sum);
-   }, 0);
- 
-   // All the lineItems should have same currency so we can use the first one to check that
-   // In case there are no lineItems we use currency from config.js as default
-   const currency =
-     lineItems[0] && lineItems[0].unitPrice ? lineItems[0].unitPrice.currency : config.currency;
- 
-   return new Money(
-     convertUnitToSubUnit(numericTotalPrice.toNumber(), unitDivisor(currency)),
-     currency
-   );
- };
- 
- // When we cannot speculatively initiate a transaction (i.e. logged
- // out), we must estimate the transaction for booking breakdown. This function creates
- // an estimated transaction object for that use case.
- //
- // We need to use FTW backend to calculate the correct line items through thransactionLineItems
- // endpoint so that they can be passed to this estimated transaction.
- const estimatedTransaction = (bookingStart, bookingEnd, lineItems, userRole,...rest) => {
-   const now = new Date();
- 
-   const isCustomer = userRole === 'customer';
- 
-   const customerLineItems = lineItems.filter(item => item.includeFor.includes('customer'));
-   const providerLineItems = lineItems.filter(item => item.includeFor.includes('provider'));
- 
-   const payinTotal = estimatedTotalPrice(customerLineItems);
-   const payoutTotal = estimatedTotalPrice(providerLineItems);
- 
-   return {
-     id: new UUID('estimated-transaction'),
-     type: 'transaction',
-     attributes: {
-       createdAt: now,
-       lastTransitionedAt: now,
-       lastTransition: TRANSITION_REQUEST_PAYMENT,
-       payinTotal,
-       payoutTotal,
-       lineItems: isCustomer ? customerLineItems : providerLineItems,
-       transitions: [
-         {
-           createdAt: now,
-           by: TX_TRANSITION_ACTOR_CUSTOMER,
-           transition: TRANSITION_REQUEST_PAYMENT,
-         },
-       ],
-     },
-     booking: {
-       id: new UUID('estimated-booking'),
-       type: 'booking',
-       attributes: {
-         start: bookingStart,
-         end: bookingEnd,
-         ...rest
-       },
-     },
-   };
- };
- 
- const EstimatedBreakdownMaybe = props => {
-   const { unitType, startDate, endDate, timeZone } = props.bookingData;
-   const lineItems = props.lineItems;
-  
-   // Currently the estimated breakdown is used only on ListingPage where we want to
-   // show the breakdown for customer so we can use hard-coded value here
-   const userRole = 'customer';
- 
-   const tx =
-   startDate && endDate && lineItems 
-       ? estimatedTransaction(startDate, endDate, lineItems, userRole)
-       : null;
+import React from 'react';
+import Decimal from 'decimal.js';
+import { types as sdkTypes } from '../../util/sdkLoader';
+import { TRANSITION_REQUEST_PAYMENT, TX_TRANSITION_ACTOR_CUSTOMER } from '../../util/transaction';
+import { unitDivisor, convertMoneyToNumber, convertUnitToSubUnit } from '../../util/currency';
+import config from '../../config';
+import { BookingBreakdown } from '../../components';
 
-       return tx ? (
-     <BookingBreakdown
-       className={css.receipt}
-       userRole={userRole}
-       unitType={unitType}
-       transaction={tx}
-       booking={tx.booking}
-       timeZone={timeZone}
-     />
-   ) : null;
- };
- 
- export default EstimatedBreakdownMaybe;
- 
+import css from './BookingTimeForm.module.css';
+
+const { Money, UUID } = sdkTypes;
+
+const estimatedTotalPrice = lineItems => {
+  const numericTotalPrice = lineItems.reduce((sum, lineItem) => {
+    const numericPrice = convertMoneyToNumber(lineItem.lineTotal);
+    return new Decimal(numericPrice).add(sum);
+  }, 0);
+
+  // All the lineItems should have same currency so we can use the first one to check that
+  // In case there are no lineItems we use currency from config.js as default
+  const currency =
+    lineItems[0] && lineItems[0].unitPrice ? lineItems[0].unitPrice.currency : config.currency;
+
+  return new Money(
+    convertUnitToSubUnit(numericTotalPrice.toNumber(), unitDivisor(currency)),
+    currency
+  );
+};
+
+// When we cannot speculatively initiate a transaction (i.e. logged
+// out), we must estimate the transaction for booking breakdown. This function creates
+// an estimated transaction object for that use case.
+//
+// We need to use FTW backend to calculate the correct line items through thransactionLineItems
+// endpoint so that they can be passed to this estimated transaction.
+const estimatedTransaction = (
+  bookingStart,
+  bookingEnd,
+  lineItems,
+  userRole,
+  displayStart,
+  displayEnd,
+  ...rest
+) => {
+  const now = new Date();
+
+  const isCustomer = userRole === 'customer';
+
+  const customerLineItems = lineItems.filter(item => item.includeFor.includes('customer'));
+  const providerLineItems = lineItems.filter(item => item.includeFor.includes('provider'));
+
+  const payinTotal = estimatedTotalPrice(customerLineItems);
+  const payoutTotal = estimatedTotalPrice(providerLineItems);
+
+  return {
+    id: new UUID('estimated-transaction'),
+    type: 'transaction',
+    attributes: {
+      createdAt: now,
+      lastTransitionedAt: now,
+      lastTransition: TRANSITION_REQUEST_PAYMENT,
+      payinTotal,
+      payoutTotal,
+      lineItems: isCustomer ? customerLineItems : providerLineItems,
+      transitions: [
+        {
+          createdAt: now,
+          by: TX_TRANSITION_ACTOR_CUSTOMER,
+          transition: TRANSITION_REQUEST_PAYMENT,
+        },
+      ],
+    },
+    booking: {
+      id: new UUID('estimated-booking'),
+      type: 'booking',
+      attributes: {
+        start: bookingStart,
+        end: bookingEnd,
+        displayStart,
+        displayEnd,
+        ...rest,
+      },
+    },
+  };
+};
+
+const EstimatedBreakdownMaybe = props => {
+  const { unitType, startDate, endDate, timeZone, displayStart, displayEnd } = props.bookingData;
+  const lineItems = props.lineItems;
+
+  // Currently the estimated breakdown is used only on ListingPage where we want to
+  // show the breakdown for customer so we can use hard-coded value here
+  const userRole = 'customer';
+
+  const tx =
+    startDate && endDate && displayStart && displayEnd && lineItems
+      ? estimatedTransaction(startDate, endDate, lineItems, userRole, displayStart, displayEnd)
+      : null;
+  
+  return tx ? (
+    <BookingBreakdown
+      className={css.receipt}
+      userRole={userRole}
+      unitType={unitType}
+      transaction={tx}
+      booking={tx.booking}
+      timeZone={timeZone}
+    />
+  ) : null;
+};
+
+export default EstimatedBreakdownMaybe;

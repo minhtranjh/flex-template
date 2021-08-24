@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import config from '../../config';
-import { DATE_TYPE_DATE } from '../../util/types';
+import { DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
 import { BookingBreakdown } from '../../components';
 
 import css from './TransactionPanel.module.css';
@@ -22,7 +22,7 @@ const BreakdownMaybe = props => {
         unitType={config.bookingUnitType}
         transaction={transaction}
         booking={transaction.booking}
-        dateType={DATE_TYPE_DATE}
+        dateType={DATE_TYPE_DATETIME}
       />
     </div>
   ) : null;
