@@ -22,6 +22,7 @@ import {
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
 import FieldDateAndTimeInput from './FieldDateAndTimeInput';
 import css from './BookingTimeForm.module.css';
+import { getLocalTimeZone } from '../../util/time';
 
 const identity = v => v;
 const { Money } = sdkTypes;
@@ -91,14 +92,19 @@ export class BookingTimeFormComponent extends Component {
 
     const listingId = this.props.listingId;
     const isOwnListing = this.props.isOwnListing;
-    const isSameDate = startDate === endDate
+
+    const isSameDate = ()=>{
+      const start = new Date(startDate).getTime()
+      const end = new Date(endDate).getTime()
+      return start===end
+    }
     if (
       startDate &&
       endDate &&
       startTime &&
       endTime &&
       bookingDisplayEnd &&
-      bookingDisplayStart && !isSameDate&&
+      bookingDisplayStart && !isSameDate()&&
       !this.props.fetchLineItemsInProgress
     ) {
       this.props.onFetchTransactionLineItems({
@@ -244,18 +250,18 @@ export class BookingTimeFormComponent extends Component {
           );
           const startDateInputProps = {
             label: bookingStartLabel,
-            placeholderText: startDatePlaceholder,
+            placeholderText: startDatePlaceholderText,
           };
           const endDateInputProps = {
             label: bookingEndLabel,
-            placeholderText: endDatePlaceholder,
+            placeholderText: endDatePlaceholderText,
           };
 
           const dateInputProps = {
             startDateInputProps,
             endDateInputProps,
           };
-
+          const timeZone = getLocalTimeZone()
           return (
             <Form onSubmit={handleSubmit} className={classes} enforcePagePreloadFor="CheckoutPage">
               {timeSlotsError}
@@ -279,10 +285,13 @@ export class BookingTimeFormComponent extends Component {
                 intl={intl}
                 form={form}
                 pristine={pristine}
-                timeZone={'Asia/Saigon'}
+                timeZone={timeZone}
                 startDateErrorMessage={startDateErrorMessage}
                 endDateErrorMessage={endDateErrorMessage}
                 requiredMessage={requiredMessage}
+                onFocusedInputChange={this.onFocusedInputChange}
+                focusedInput={this.state.focusedInput}
+                unitType={unitType}
               />
               {bookingInfoMaybe}
               {loadingSpinnerMaybe}

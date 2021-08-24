@@ -5,21 +5,18 @@ import config from '../../config';
 import { intlShape } from '../../util/reactIntl';
 import {
   getStartHours,
-  getEndHours,
   isInRange,
-  isSameDate,
-  isDayMomentInsideRange,
   resetToStartOfDay,
   timeOfDayFromLocalToTimeZone,
   timeOfDayFromTimeZoneToLocal,
   dateIsAfter,
   findNextBoundary,
-  timestampToDate,
   localizeAndFormatTime,
   monthIdStringInTimeZone,
   getMonthStartInTimeZone,
   nextMonthFn,
   prevMonthFn,
+  dateIsAfterOnly,
 } from '../../util/time';
 import { propTypes } from '../../util/types';
 import { bookingDateRequired } from '../../util/validators';
@@ -51,8 +48,8 @@ const addTimeToDate = (oldTime, oldDate) => {
   return moment(oldDate)
     .set({
       hour: tempTime,
-      minute : 0,
-      second : 0
+      minute: 0,
+      second: 0,
     })
     .toDate();
 };
@@ -87,7 +84,6 @@ const getTimeSlots = (timeSlots, date, timeZone) => {
     : [];
 };
 
-
 const Next = props => {
   const { currentMonth, timeZone } = props;
   const nextMonthDate = nextMonthFn(currentMonth, timeZone);
@@ -118,7 +114,8 @@ class FieldDateAndTimeInput extends Component {
     this.onBookingStartDateChange = this.onBookingStartDateChange.bind(this);
     this.onBookingStartTimeChange = this.onBookingStartTimeChange.bind(this);
     this.onBookingEndDateChange = this.onBookingEndDateChange.bind(this);
-    this.onBookingEndTimeChange= this.onBookingEndTimeChange.bind(this);
+    this.onBookingEndTimeChange = this.onBookingEndTimeChange.bind(this);
+    this.isOutsideRange = this.isOutsideRange.bind(this);
   }
 
   fetchMonthData(date) {
@@ -225,7 +222,20 @@ class FieldDateAndTimeInput extends Component {
       form.change('bookingEndTime', null);
     });
   };
+  isOutsideRange(day, bookingStartDate, timeZone) {
+    if (!bookingStartDate) {
+      return true;
+    }
 
+    // 'day' is pointing to browser's local time-zone (react-dates gives these).
+    // However, bookingStartDate and selectedTimeSlot refer to times in listing's timeZone.
+    const localizedDay = timeOfDayFromLocalToTimeZone(day, timeZone);
+    // Given day (endDate) should be after the start of the day of selected booking start date.
+    const startDate = resetToStartOfDay(bookingStartDate, timeZone);
+    // 00:00 would return wrong day as the end date.
+    // Removing 1 millisecond, solves the exclusivity issue.
+    return !(dateIsAfterOnly(localizedDay, startDate));
+  }
   render() {
     const {
       rootClassName,
@@ -238,7 +248,6 @@ class FieldDateAndTimeInput extends Component {
       timeZone,
       intl,
     } = this.props;
-
     const classes = classNames(rootClassName || css.root, className);
 
     const bookingStartDate =
@@ -251,16 +260,8 @@ class FieldDateAndTimeInput extends Component {
     const endDateDisabled = !bookingStartDate || !bookingStartTime;
     const endTimeDisabled = !bookingStartDate || !bookingStartTime || !bookingEndDate;
 
-    const timeSlotsOnSelectedStartDate = getTimeSlots(
-      timeSlots,
-      bookingStartDate,
-      timeZone
-    );
-    const timeSlotsOnSelectedEndDate = getTimeSlots(
-      timeSlots,
-      bookingEndDate,
-      timeZone
-    );
+    const timeSlotsOnSelectedStartDate = getTimeSlots(timeSlots, bookingStartDate, timeZone);
+    const timeSlotsOnSelectedEndDate = getTimeSlots(timeSlots, bookingEndDate, timeZone);
 
     const availableStartTimes = bookingStartDate
       ? getAvailableTime(intl, timeZone, bookingStartDate, timeSlotsOnSelectedStartDate)
@@ -284,7 +285,6 @@ class FieldDateAndTimeInput extends Component {
      * 2. Remove the div containing the line between dates
      * 3. Remove the css related to hiding the booking end date from the bottom of the FieldDateAndTimeInput.css field
      */
-
     return (
       <div className={classes}>
         <div className={css.formRow}>
@@ -358,7 +358,9 @@ class FieldDateAndTimeInput extends Component {
               useMobileMargins
               validate={bookingDateRequired('Required')}
               disabled={endDateDisabled}
-              showLabelAsDisabled={endDateDisabled}
+              isOutsideRange={day =>
+                this.isOutsideRange(day, bookingStartDate, timeZone)
+              }
             />
           </div>
           <div className={css.field}>

@@ -455,7 +455,9 @@ export const minutesBetween = (startDate, endDate) => {
 export const dateIsAfter = (date, compareToDate) => {
   return moment(date).isSameOrAfter(compareToDate);
 };
-
+export const dateIsAfterOnly = (date,compareToDate)=>{
+  return moment(date).isAfter(compareToDate,"day")
+}
 /**
  * Check if the date is in the given range, start and end included.
  * @param {Date} date to be checked
@@ -477,6 +479,7 @@ export const isInRange = (date, start, end, scope, timeZone) => {
     : moment(date).isBetween(start, end, scope, '[)');
 };
 
+export const getLocalTimeZone = ()=> moment.tz.guess()
 /**
  * Resets the date to 00:00:00
  *
