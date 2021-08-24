@@ -3,7 +3,7 @@ import { array, arrayOf, bool, func, shape, string, oneOf } from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import config from '../../config';
 import routeConfiguration from '../../routeConfiguration';
 import { findOptionsForSelectFilter } from '../../util/search';
@@ -54,6 +54,10 @@ import SectionMapMaybe from './SectionMapMaybe';
 import css from './ListingPage.module.css';
 import SectionViewMaybe from './SectionViewMaybe';
 import SectionCapacityMaybe from './SectionCapacityMaybe';
+import {
+  EQUIPMENT_LISTING_TYPE,
+  SAUNA_LISTING_TYPE,
+} from '../../components/EditListingWizard/EditListingWizard';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -393,6 +397,17 @@ export class ListingPageComponent extends Component {
         </span>
       ) : null;
     const viewOptions = findOptionsForSelectFilter('view', filterConfig);
+    if (
+      currentListing.attributes.publicData.listingType &&
+      currentListing.attributes.publicData.listingType === EQUIPMENT_LISTING_TYPE
+    ) {
+      console.log(currentListing)
+      return (
+        <Redirect
+          to={`/l/${currentListing.attributes.publicData.listingType}/${listingSlug}/${currentListing.id.uuid}`}
+        />
+      );
+    }
     return (
       <Page
         title={schemaTitle}
@@ -423,7 +438,9 @@ export class ListingPageComponent extends Component {
                   slug: listingSlug,
                   type: listingType,
                   tab: listingTab,
-                  listingType : currentListing.attributes.publicData.listingType ? currentListing.attributes.publicData.listingType : "sauna"
+                  listingType: currentListing.attributes.publicData.listingType
+                    ? currentListing.attributes.publicData.listingType
+                    : 'sauna',
                 }}
                 imageCarouselOpen={this.state.imageCarouselOpen}
                 onImageCarouselClose={() => this.setState({ imageCarouselOpen: false })}

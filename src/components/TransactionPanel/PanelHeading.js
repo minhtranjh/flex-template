@@ -5,6 +5,7 @@ import { createSlug, stringify } from '../../util/urlHelpers';
 import { NamedLink } from '../../components';
 
 import css from './TransactionPanel.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 
 export const HEADING_ENQUIRED = 'enquired';
 export const HEADING_PAYMENT_PENDING = 'pending-payment';
@@ -15,10 +16,17 @@ export const HEADING_DECLINED = 'declined';
 export const HEADING_CANCELED = 'canceled';
 export const HEADING_DELIVERED = 'delivered';
 
-const createListingLink = (listingId, label, listingDeleted, searchParams = {}, className = '') => {
+const createListingLink = (listingId, label, listingDeleted,listingType, searchParams = {}, className = '') => {
   if (!listingDeleted) {
-    const params = { id: listingId, slug: createSlug(label) };
+    const params = { id: listingId, slug: createSlug(label),listingType };
     const to = { search: stringify(searchParams) };
+    if(listingType===EQUIPMENT_LISTING_TYPE){
+      return (
+        <NamedLink className={className} name="EquipmentListingPage" params={params} to={to}>
+          {label}
+        </NamedLink>
+      );
+    }
     return (
       <NamedLink className={className} name="ListingPage" params={params} to={to}>
         {label}
@@ -102,6 +110,7 @@ const PanelHeading = props => {
     listingId,
     listingTitle,
     listingDeleted,
+    listingType,
     isCustomerBanned,
   } = props;
 
@@ -109,7 +118,7 @@ const PanelHeading = props => {
 
   const defaultRootClassName = isCustomer ? css.headingOrder : css.headingSale;
   const titleClasses = classNames(rootClassName || defaultRootClassName, className);
-  const listingLink = createListingLink(listingId, listingTitle, listingDeleted);
+  const listingLink = createListingLink(listingId, listingTitle, listingDeleted,listingType);
 
   switch (panelHeadingState) {
     case HEADING_ENQUIRED:
