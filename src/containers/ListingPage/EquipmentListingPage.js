@@ -108,14 +108,24 @@ export class EquipmentListingPageComponent extends Component {
     } = this.props;
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
-    const { bookingDates, ...bookingData } = values;
+    const {
+      bookingStartDate,
+      bookingEndDate,
+      bookingDisplayStart,
+      bookingDisplayEnd,
+      ...bookingData
+    } = values;
 
     const initialValues = {
       listing,
-      bookingData,
+      bookingData: {
+        displayStart: bookingDisplayStart,
+        displayEnd: bookingDisplayEnd,
+        ...bookingData,
+      },
       bookingDates: {
-        bookingStart: bookingDates.startDate,
-        bookingEnd: bookingDates.endDate,
+        bookingStart: bookingStartDate.date,
+        bookingEnd: bookingEndDate.date,
       },
       confirmPaymentError: null,
     };
@@ -196,7 +206,6 @@ export class EquipmentListingPageComponent extends Component {
       sendEnquiryInProgress,
       sendEnquiryError,
       timeSlots,
-      monthlyTimeSlots,
       onFetchTimeSlots,
       filterConfig,
       onFetchTransactionLineItems,
@@ -380,9 +389,7 @@ export class EquipmentListingPageComponent extends Component {
       </NamedLink>
     );
     const equipmentTypeOptions = findOptionsForSelectFilter('equipmentTypes', filterConfig);
-    if (
-      currentListing.attributes.publicData.listingType !== EQUIPMENT_LISTING_TYPE
-    ) {
+    if (currentListing.attributes.publicData.listingType !== EQUIPMENT_LISTING_TYPE) {
       return <Redirect to={`/l/${listingSlug}/${currentListing.id.uuid}`} />;
     }
     return (
@@ -473,7 +480,7 @@ export class EquipmentListingPageComponent extends Component {
                   />
                 </div>
                 <BookingTimePanel
-                intl={intl}
+                  intl={intl}
                   className={css.bookingPanel}
                   listing={currentListing}
                   isOwnListing={isOwnListing}
@@ -623,8 +630,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(fetchTransactionLineItems(bookingData, listingId, isOwnListing)),
   onSendEnquiry: (listingId, message) => dispatch(sendEnquiry(listingId, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
-  onFetchTimeSlots: (listingId, start, end) =>
-    dispatch(fetchTimeSlots(listingId, start, end)),
+  onFetchTimeSlots: (listingId, start, end) => dispatch(fetchTimeSlots(listingId, start, end)),
 });
 
 // Note: it is important that the withRouter HOC is **outside** the
