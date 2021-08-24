@@ -165,7 +165,7 @@ class FieldDateAndTimeInput extends Component {
   }
 
   onBookingStartDateChange = value => {
-    const { timeZone, form } = this.props;
+    const { timeZone, form, values } = this.props;
     if (!value || !value.date) {
       form.batch(() => {
         form.change('bookingStartTime', null);
@@ -181,9 +181,19 @@ class FieldDateAndTimeInput extends Component {
     // This callback function (onBookingStartDateChange) is called from react-dates component.
     // It gets raw value as a param - browser's local time instead of time in listing's timezone.
     const startDate = timeOfDayFromLocalToTimeZone(value.date, timeZone);
+    const isSameDateToEndDate = () => {
+      if (values && values.bookingEndDate && values.bookingEndDate.date) {
+        return new Date(values.bookingEndDate.date).getTime() === new Date(startDate).getTime();
+      }
+      return false;
+    };
     form.batch(() => {
       form.change('bookingStartDate', { date: startDate });
       form.change('bookingStartTime', null);
+      if (isSameDateToEndDate()) {
+        form.change('bookingEndDate', { date: null });
+        form.change('bookingEndTime', null);
+      }
     });
   };
 
@@ -234,7 +244,7 @@ class FieldDateAndTimeInput extends Component {
     const startDate = resetToStartOfDay(bookingStartDate, timeZone);
     // 00:00 would return wrong day as the end date.
     // Removing 1 millisecond, solves the exclusivity issue.
-    return !(dateIsAfterOnly(localizedDay, startDate));
+    return !dateIsAfterOnly(localizedDay, startDate);
   }
   render() {
     const {
@@ -358,9 +368,7 @@ class FieldDateAndTimeInput extends Component {
               useMobileMargins
               validate={bookingDateRequired('Required')}
               disabled={endDateDisabled}
-              isOutsideRange={day =>
-                this.isOutsideRange(day, bookingStartDate, timeZone)
-              }
+              isOutsideRange={day => this.isOutsideRange(day, bookingStartDate, timeZone)}
             />
           </div>
           <div className={css.field}>
