@@ -279,7 +279,7 @@ export class BookingTimeFormComponent extends Component {
                 intl={intl}
                 form={form}
                 pristine={pristine}
-                timeZone={'Asia/Sai_gon'}
+                timeZone={'Asia/Sai_Gon'}
                 startDateErrorMessage={startDateErrorMessage}
                 endDateErrorMessage={endDateErrorMessage}
                 requiredMessage={requiredMessage}
