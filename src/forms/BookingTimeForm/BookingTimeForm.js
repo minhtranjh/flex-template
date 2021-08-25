@@ -15,17 +15,12 @@ import {
   Form,
   IconSpinner,
   PrimaryButton,
-  FieldDateRangeInput,
-  FieldCheckbox,
-  FieldSelect,
 } from '../../components';
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
 import FieldDateAndTimeInput from './FieldDateAndTimeInput';
 import css from './BookingTimeForm.module.css';
 import { getLocalTimeZone } from '../../util/time';
 
-const identity = v => v;
-const { Money } = sdkTypes;
 export class BookingTimeFormComponent extends Component {
   constructor(props) {
     super(props);
@@ -163,7 +158,6 @@ export class BookingTimeFormComponent extends Component {
             canHourlyBooking,
             listingId,
             onFetchTimeSlots,
-            listingType
           } = fieldRenderProps;
 
           const startDate = values && values.bookingStartDate ? values.bookingStartDate : {};
@@ -216,7 +210,7 @@ export class BookingTimeFormComponent extends Component {
               <h3 className={css.priceBreakdownTitle}>
                 <FormattedMessage id="BookingDatesForm.priceBreakdownTitle" />
               </h3>
-              <EstimatedBreakdownMaybe listingType={listingType} bookingData={bookingData} lineItems={lineItems} />
+              <EstimatedBreakdownMaybe  bookingData={bookingData} lineItems={lineItems} />
             </div>
           ) : null;
 

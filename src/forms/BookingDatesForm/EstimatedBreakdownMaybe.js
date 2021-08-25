@@ -123,7 +123,7 @@ const estimatedTransaction = (bookingStart, bookingEnd, lineItems, userRole) => 
 const EstimatedBreakdownMaybe = props => {
   const { unitType, startDate, endDate } = props.bookingData;
   const lineItems = props.lineItems;
-  const listingType = props.listingType
+
   // Currently the estimated breakdown is used only on ListingPage where we want to
   // show the breakdown for customer so we can use hard-coded value here
   const userRole = 'customer';
@@ -132,14 +132,6 @@ const EstimatedBreakdownMaybe = props => {
     startDate && endDate && lineItems
       ? estimatedTransaction(startDate, endDate, lineItems, userRole)
       : null;
-  const dateType = () =>{
-    switch (listingType) {
-      case EQUIPMENT_LISTING_TYPE:
-        return DATE_TYPE_DATETIME    
-      default:
-        return DATE_TYPE_DATE;
-    }
-  }
   return tx ? (
     <BookingBreakdown
       className={css.receipt}
@@ -147,7 +139,7 @@ const EstimatedBreakdownMaybe = props => {
       unitType={unitType}
       transaction={tx}
       booking={tx.booking}
-      dateType={dateType()}
+      dateType={DATE_TYPE_DATE}
     />
   ) : null;
 };

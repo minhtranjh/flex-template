@@ -120,9 +120,9 @@ export class EquipmentListingPageComponent extends Component {
     const initialValues = {
       listing,
       bookingData: {
+        ...bookingData,
         displayStart: bookingDisplayStart,
         displayEnd: bookingDisplayEnd,
-        ...bookingData,
       },
       bookingDates: {
         bookingStart: bookingStartDate.date,

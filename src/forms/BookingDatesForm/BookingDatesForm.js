@@ -114,7 +114,6 @@ export class BookingDatesFormComponent extends Component {
             fetchLineItemsInProgress,
             fetchLineItemsError,
             cleaningFee,
-            listingType
           } = fieldRenderProps;
           const { startDate, endDate } = values && values.bookingDates ? values.bookingDates : {};
 
@@ -161,7 +160,7 @@ export class BookingDatesFormComponent extends Component {
               <h3 className={css.priceBreakdownTitle}>
                 <FormattedMessage id="BookingDatesForm.priceBreakdownTitle" />
               </h3>
-              <EstimatedBreakdownMaybe listingType={listingType} bookingData={bookingData} lineItems={lineItems} />
+              <EstimatedBreakdownMaybe  bookingData={bookingData} lineItems={lineItems} />
             </div>
           ) : null;
 
