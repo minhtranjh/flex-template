@@ -59,7 +59,6 @@ const getAvailableTime = (intl, timeZone, bookingStart, timeSlotsOnSelectedDate)
     return [];
   }
   const bookingStartDate = resetToStartOfDay(bookingStart, timeZone);
-
   const allHours = timeSlotsOnSelectedDate.reduce((availableHours, t) => {
     const startDate = t.attributes.start;
     const endDate = t.attributes.end;
@@ -139,33 +138,13 @@ class FieldDateAndTimeInput extends Component {
   }
 
   onMonthClick(monthFn) {
-    const { onMonthChanged, timeZone } = this.props;
+    const { timeZone } = this.props;
 
-    this.setState(
-      prevState => ({ currentMonth: monthFn(prevState.currentMonth, timeZone) }),
-      () => {
-        // Callback function after month has been updated.
-        // react-dates component has next and previous months ready (but inivisible).
-        // we try to populate those invisible months before user advances there.
-        this.fetchMonthData(monthFn(this.state.currentMonth, timeZone));
-
-        // If previous fetch for month data failed, try again.
-        const monthId = monthIdStringInTimeZone(this.state.currentMonth, timeZone);
-        const currentMonthData = this.props.timeSlots[monthId];
-        if (currentMonthData && currentMonthData.fetchTimeSlotsError) {
-          this.fetchMonthData(this.state.currentMonth, timeZone);
-        }
-
-        // Call onMonthChanged function if it has been passed in among props.
-        if (onMonthChanged) {
-          onMonthChanged(monthId);
-        }
-      }
-    );
+    this.setState(prevState => ({ currentMonth: monthFn(prevState.currentMonth, timeZone) }));
   }
 
   onBookingStartDateChange = value => {
-    const { timeZone, form, values } = this.props;
+    const { timeZone, form } = this.props;
     if (!value || !value.date) {
       form.batch(() => {
         form.change('bookingStartTime', null);
@@ -181,19 +160,11 @@ class FieldDateAndTimeInput extends Component {
     // This callback function (onBookingStartDateChange) is called from react-dates component.
     // It gets raw value as a param - browser's local time instead of time in listing's timezone.
     const startDate = timeOfDayFromLocalToTimeZone(value.date, timeZone);
-    const isSameDateToEndDate = () => {
-      if (values && values.bookingEndDate && values.bookingEndDate.date) {
-        return new Date(values.bookingEndDate.date).getTime() === new Date(startDate).getTime();
-      }
-      return false;
-    };
     form.batch(() => {
       form.change('bookingStartDate', { date: startDate });
       form.change('bookingStartTime', null);
-      if (isSameDateToEndDate()) {
-        form.change('bookingEndDate', { date: null });
-        form.change('bookingEndTime', null);
-      }
+      form.change('bookingEndDate', { date: null });
+      form.change('bookingEndTime', null);
     });
   };
 

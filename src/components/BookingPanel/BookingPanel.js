@@ -76,7 +76,7 @@ const BookingPanel = props => {
     listing.attributes.publicData && listing.attributes.publicData.cleaningFee
       ? listing.attributes.publicData.cleaningFee
       : null;
-  console.log(listing);
+
   const hasListingState = !!listing.attributes.state;
   const isClosed = hasListingState && listing.attributes.state === LISTING_STATE_CLOSED;
   const showBookingDatesForm = hasListingState && !isClosed;
@@ -133,6 +133,7 @@ const BookingPanel = props => {
             price={price}
             listingId={listing.id}
             isOwnListing={isOwnListing}
+            listingType={listing.attributes.publicData.listingType}
             timeSlots={timeSlots}
             fetchTimeSlotsError={fetchTimeSlotsError}
             onFetchTransactionLineItems={onFetchTransactionLineItems}

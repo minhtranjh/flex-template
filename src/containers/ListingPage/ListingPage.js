@@ -111,7 +111,11 @@ export class ListingPageComponent extends Component {
 
     const initialValues = {
       listing,
-      bookingData,
+      bookingData: {
+        displayStart: bookingDates.startDate,
+        displayEnd: bookingDates.endDate,
+        ...bookingData,
+      },
       bookingDates: {
         bookingStart: bookingDates.startDate,
         bookingEnd: bookingDates.endDate,
@@ -401,7 +405,6 @@ export class ListingPageComponent extends Component {
       currentListing.attributes.publicData.listingType &&
       currentListing.attributes.publicData.listingType === EQUIPMENT_LISTING_TYPE
     ) {
-      console.log(currentListing)
       return (
         <Redirect
           to={`/l/${currentListing.attributes.publicData.listingType}/${listingSlug}/${currentListing.id.uuid}`}

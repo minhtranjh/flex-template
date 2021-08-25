@@ -34,6 +34,8 @@ import config from '../../config';
 import { BookingBreakdown } from '../../components';
 
 import css from './BookingTimeForm.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
+import { DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
 
 const { Money, UUID } = sdkTypes;
 
@@ -114,7 +116,7 @@ const estimatedTransaction = (
 const EstimatedBreakdownMaybe = props => {
   const { unitType, startDate, endDate, timeZone, displayStart, displayEnd } = props.bookingData;
   const lineItems = props.lineItems;
-
+  const listingType = props.listingType;
   // Currently the estimated breakdown is used only on ListingPage where we want to
   // show the breakdown for customer so we can use hard-coded value here
   const userRole = 'customer';
@@ -123,7 +125,14 @@ const EstimatedBreakdownMaybe = props => {
     startDate && endDate && displayStart && displayEnd && lineItems
       ? estimatedTransaction(startDate, endDate, lineItems, userRole, displayStart, displayEnd)
       : null;
-  
+  const dateType = () => {
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return DATE_TYPE_DATETIME;
+      default:
+        return DATE_TYPE_DATE;
+    }
+  };
   return tx ? (
     <BookingBreakdown
       className={css.receipt}
@@ -132,6 +141,7 @@ const EstimatedBreakdownMaybe = props => {
       transaction={tx}
       booking={tx.booking}
       timeZone={timeZone}
+      dateType={dateType()}
     />
   ) : null;
 };

@@ -31,12 +31,13 @@ import Decimal from 'decimal.js';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { dateFromLocalToAPI } from '../../util/dates';
 import { TRANSITION_REQUEST_PAYMENT, TX_TRANSITION_ACTOR_CUSTOMER } from '../../util/transaction';
-import { DATE_TYPE_DATE } from '../../util/types';
+import { DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
 import { unitDivisor, convertMoneyToNumber, convertUnitToSubUnit } from '../../util/currency';
 import config from '../../config';
 import { BookingBreakdown } from '../../components';
 
 import css from './BookingDatesForm.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const { Money, UUID } = sdkTypes;
 
@@ -122,7 +123,7 @@ const estimatedTransaction = (bookingStart, bookingEnd, lineItems, userRole) => 
 const EstimatedBreakdownMaybe = props => {
   const { unitType, startDate, endDate } = props.bookingData;
   const lineItems = props.lineItems;
-
+  const listingType = props.listingType
   // Currently the estimated breakdown is used only on ListingPage where we want to
   // show the breakdown for customer so we can use hard-coded value here
   const userRole = 'customer';
@@ -131,7 +132,14 @@ const EstimatedBreakdownMaybe = props => {
     startDate && endDate && lineItems
       ? estimatedTransaction(startDate, endDate, lineItems, userRole)
       : null;
-
+  const dateType = () =>{
+    switch (listingType) {
+      case EQUIPMENT_LISTING_TYPE:
+        return DATE_TYPE_DATETIME    
+      default:
+        return DATE_TYPE_DATE;
+    }
+  }
   return tx ? (
     <BookingBreakdown
       className={css.receipt}
@@ -139,7 +147,7 @@ const EstimatedBreakdownMaybe = props => {
       unitType={unitType}
       transaction={tx}
       booking={tx.booking}
-      dateType={DATE_TYPE_DATETIME}
+      dateType={dateType()}
     />
   ) : null;
 };

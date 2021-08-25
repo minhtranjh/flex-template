@@ -163,6 +163,7 @@ export class BookingTimeFormComponent extends Component {
             canHourlyBooking,
             listingId,
             onFetchTimeSlots,
+            listingType
           } = fieldRenderProps;
 
           const startDate = values && values.bookingStartDate ? values.bookingStartDate : {};
@@ -215,7 +216,7 @@ export class BookingTimeFormComponent extends Component {
               <h3 className={css.priceBreakdownTitle}>
                 <FormattedMessage id="BookingDatesForm.priceBreakdownTitle" />
               </h3>
-              <EstimatedBreakdownMaybe bookingData={bookingData} lineItems={lineItems} />
+              <EstimatedBreakdownMaybe listingType={listingType} bookingData={bookingData} lineItems={lineItems} />
             </div>
           ) : null;
 

@@ -108,6 +108,7 @@ export class EquipmentListingPageComponent extends Component {
     } = this.props;
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
+    const listingType = listing.attributes.publicData.listingType;
     const {
       bookingStartDate,
       bookingEndDate,
@@ -146,7 +147,7 @@ export class EquipmentListingPageComponent extends Component {
       createResourceLocatorString(
         'CheckoutPage',
         routes,
-        { id: listing.id.uuid, slug: createSlug(listing.attributes.title) },
+        { listingType, id: listing.id.uuid, slug: createSlug(listing.attributes.title) },
         {}
       )
     );

@@ -61,6 +61,7 @@ import {
 } from './CheckoutPage.duck';
 import { storeData, storedData, clearData } from './CheckoutPageSessionHelpers';
 import css from './CheckoutPage.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const STORAGE_KEY = 'CheckoutPage';
 
@@ -522,6 +523,7 @@ export class CheckoutPageComponent extends Component {
     // initiate or the speculative initiate fail due to the listing
     // being deleted or closec, we should dig the information from the
     // errors and not the listing data.
+
     const listingNotFound =
       isTransactionInitiateListingNotFoundError(speculateTransactionError) ||
       isTransactionInitiateListingNotFoundError(initiateOrderError);
@@ -538,7 +540,7 @@ export class CheckoutPageComponent extends Component {
 
     const listingTitle = currentListing.attributes.title;
     const title = intl.formatMessage({ id: 'CheckoutPage.title' }, { listingTitle });
-
+    const listingType = currentListing.attributes.publicData.listingType
     const pageProps = { title, scrollingDisabled };
     const topbar = (
       <div className={css.topbar}>
@@ -580,6 +582,7 @@ export class CheckoutPageComponent extends Component {
 
     // Redirect back to ListingPage if data is missing.
     // Redirection must happen before any data format error is thrown (e.g. wrong currency)
+
     if (shouldRedirect) {
       // eslint-disable-next-line no-console
       console.error('Missing or invalid data for checkout, redirecting back to listing page.', {
@@ -595,7 +598,14 @@ export class CheckoutPageComponent extends Component {
     const tx = existingTransaction.booking ? existingTransaction : speculatedTransaction;
 
     const txBooking = ensureBooking(tx.booking);
-
+    const dateType = ()=>{
+      switch (listingType) {
+        case EQUIPMENT_LISTING_TYPE:
+          return DATE_TYPE_DATETIME      
+        default:
+          return DATE_TYPE_DATE
+      }
+    }
     const breakdown =
       tx.id && txBooking.id ? (
         <BookingBreakdown
@@ -604,7 +614,7 @@ export class CheckoutPageComponent extends Component {
           unitType={config.bookingUnitType}
           transaction={tx}
           booking={txBooking}
-          dateType={DATE_TYPE_DATETIME}
+          dateType={dateType()}
         />
       ) : null;
 
