@@ -12,7 +12,6 @@ import {
   dateIsAfter,
   findNextBoundary,
   localizeAndFormatTime,
-  monthIdStringInTimeZone,
   getMonthStartInTimeZone,
   nextMonthFn,
   prevMonthFn,
@@ -97,6 +96,12 @@ const Prev = props => {
   return dateIsAfter(prevMonthDate, currentMonthDate) ? <PreviousMonthIcon /> : null;
 };
 
+const getFirstTimeValue = (intl, timeZone, timeSlots, date) => {
+  const times = getAvailableTime(intl, timeZone, date, getTimeSlots(timeSlots, date, timeZone));
+  const time =
+    times.length > 0 && times[0] && times[0].timestamp ? times[0].timestamp.toString() : null;
+  return { date, time };
+};
 /////////////////////////////////////
 // FieldDateAndTimeInput component //
 /////////////////////////////////////
@@ -108,33 +113,12 @@ class FieldDateAndTimeInput extends Component {
       currentMonth: getMonthStartInTimeZone(TODAY, props.timeZone),
     };
 
-    this.fetchMonthData = this.fetchMonthData.bind(this);
     this.onMonthClick = this.onMonthClick.bind(this);
     this.onBookingStartDateChange = this.onBookingStartDateChange.bind(this);
     this.onBookingStartTimeChange = this.onBookingStartTimeChange.bind(this);
     this.onBookingEndDateChange = this.onBookingEndDateChange.bind(this);
     this.onBookingEndTimeChange = this.onBookingEndTimeChange.bind(this);
     this.isOutsideRange = this.isOutsideRange.bind(this);
-  }
-
-  fetchMonthData(date) {
-    const { listingId, timeZone, onFetchTimeSlots } = this.props;
-    const endOfRangeDate = endOfRange(TODAY, timeZone);
-
-    // Don't fetch timeSlots for past months or too far in the future
-    if (isInRange(date, TODAY, endOfRangeDate)) {
-      // Use "today", if the first day of given month is in the past
-      const start = dateIsAfter(TODAY, date) ? TODAY : date;
-
-      // Use endOfRangeDate, if the first day of the next month is too far in the future
-      const nextMonthDate = nextMonthFn(date, timeZone);
-      const end = dateIsAfter(nextMonthDate, endOfRangeDate)
-        ? resetToStartOfDay(endOfRangeDate, timeZone, 0)
-        : nextMonthDate;
-
-      // Fetch time slots for given time range
-      onFetchTimeSlots(listingId, start, end, timeZone);
-    }
   }
 
   onMonthClick(monthFn) {
@@ -144,27 +128,36 @@ class FieldDateAndTimeInput extends Component {
   }
 
   onBookingStartDateChange = value => {
-    const { timeZone, form } = this.props;
+    const { timeZone, timeSlots, intl, form } = this.props;
     if (!value || !value.date) {
       form.batch(() => {
         form.change('bookingStartTime', null);
         form.change('bookingEndDate', { date: null });
         form.change('bookingEndTime', null);
       });
-      // Reset the currentMonth too if bookingStartDate is cleared
       this.setState({ currentMonth: getMonthStartInTimeZone(TODAY, timeZone) });
 
       return;
     }
 
-    // This callback function (onBookingStartDateChange) is called from react-dates component.
-    // It gets raw value as a param - browser's local time instead of time in listing's timezone.
     const startDate = timeOfDayFromLocalToTimeZone(value.date, timeZone);
+    const timeSlotsOnSelectedStartDate = getTimeSlots(timeSlots, startDate, timeZone);
+    const { time: startTime } = getFirstTimeValue(
+      intl,
+      timeZone,
+      timeSlotsOnSelectedStartDate,
+      startDate
+    );
+    const displayStart = addTimeToDate(startTime, startDate);
+
     form.batch(() => {
       form.change('bookingStartDate', { date: startDate });
-      form.change('bookingStartTime', null);
+      form.change('bookingStartTime', startTime);
+      form.change('bookingDisplayStart', displayStart);
+
       form.change('bookingEndDate', { date: null });
       form.change('bookingEndTime', null);
+      form.change('bookingDisplayEnd', null);
     });
   };
 
@@ -188,19 +181,25 @@ class FieldDateAndTimeInput extends Component {
     });
   };
   onBookingEndDateChange = value => {
-    const { timeZone, form } = this.props;
+    const { intl, timeZone, timeSlots, form } = this.props;
     if (!value || !value.date) {
       form.change('bookingEndTime', null);
       return;
     }
-
-    // This callback function (onBookingStartDateChange) is called from react-dates component.
-    // It gets raw value as a param - browser's local time instead of time in listing's timezone.
     const endDate = timeOfDayFromLocalToTimeZone(value.date, timeZone);
+    const timeSlotsOnSelectedEndDate = getTimeSlots(timeSlots, endDate, timeZone);
+    const { time: endTime } = getFirstTimeValue(
+      intl,
+      timeZone,
+      timeSlotsOnSelectedEndDate,
+      endDate
+    );
+    const displayEnd = addTimeToDate(endTime, endDate);
 
     form.batch(() => {
       form.change('bookingEndDate', { date: endDate });
-      form.change('bookingEndTime', null);
+      form.change('bookingEndTime', endTime);
+      form.change('bookingDisplayEnd', displayEnd);
     });
   };
   isOutsideRange(day, bookingStartDate, timeZone) {
@@ -230,7 +229,7 @@ class FieldDateAndTimeInput extends Component {
       intl,
     } = this.props;
     const classes = classNames(rootClassName || css.root, className);
-
+    console.log(values);
     const bookingStartDate =
       values.bookingStartDate && values.bookingStartDate.date ? values.bookingStartDate.date : null;
     const bookingStartTime = values.bookingStartTime ? values.bookingStartTime : null;
@@ -259,13 +258,7 @@ class FieldDateAndTimeInput extends Component {
 
     const startTimeLabel = intl.formatMessage({ id: 'FieldDateTimeInput.startTime' });
     const endTimeLabel = intl.formatMessage({ id: 'FieldDateTimeInput.endTime' });
-    /**
-     * NOTE: In this template the field for the end date is hidden by default.
-     * If you want to enable longer booking periods, showing the end date in the form requires some code changes:
-     * 1. Move the bookingStartTime field to the same formRow with the bookingStartDate field
-     * 2. Remove the div containing the line between dates
-     * 3. Remove the css related to hiding the booking end date from the bottom of the FieldDateAndTimeInput.css field
-     */
+
     return (
       <div className={classes}>
         <div className={css.formRow}>
@@ -353,8 +346,8 @@ class FieldDateAndTimeInput extends Component {
             >
               {bookingStartDate && bookingEndDate ? (
                 availableEndTimes.map(p => (
-                  <option key={p.timeOfDay === '00:00' ? '24:00' : p.timeOfDay} value={p.timestamp}>
-                    {p.timeOfDay === '00:00' ? '24:00' : p.timeOfDay}
+                  <option key={p.timeOfDay} value={p.timestamp}>
+                    {p.timeOfDay}
                   </option>
                 ))
               ) : (
