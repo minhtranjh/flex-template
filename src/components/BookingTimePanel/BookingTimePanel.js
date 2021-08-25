@@ -141,7 +141,6 @@ const BookingTimePanel = props => {
             unitType={unitType}
             onSubmit={onSubmit}
             price={price}
-            listingType={listing.attributes.publicData.listingType}
             listingId={listing.id}
             isOwnListing={isOwnListing}
             timeSlots={timeSlots}

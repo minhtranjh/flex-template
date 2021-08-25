@@ -133,7 +133,6 @@ const BookingPanel = props => {
             price={price}
             listingId={listing.id}
             isOwnListing={isOwnListing}
-            listingType={listing.attributes.publicData.listingType}
             timeSlots={timeSlots}
             fetchTimeSlotsError={fetchTimeSlotsError}
             onFetchTransactionLineItems={onFetchTransactionLineItems}

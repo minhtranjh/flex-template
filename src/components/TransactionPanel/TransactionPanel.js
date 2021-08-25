@@ -456,6 +456,7 @@ export class TransactionPanelComponent extends Component {
                 />
               ) : null}
               <BreakdownMaybe
+              listingType={currentListing.attributes.publicData.listingType}
                 className={css.breakdownContainer}
                 transaction={currentTransaction}
                 transactionRole={transactionRole}
