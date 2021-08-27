@@ -190,6 +190,27 @@
   }
 }
 
+.transactionAttentionMessage{
+  margin: 18px 4px 0 24px;
+  color: var(--attentionColor);
+  font-size: 13px;
+  @media (--viewportMedium) {
+    margin: 23px 24px 0 24px;
+  }
+  @media (--viewportLarge) {
+    margin: 23px 0 0 0;
+  }
+}
+.transactionExpireRefundCancelMessage{
+  margin: 18px 24px 0 24px;
+  color: var(--failColor);
+  @media (--viewportMedium) {
+    margin: 23px 24px 0 24px;
+  }
+  @media (--viewportLarge) {
+    margin: 23px 0 0 0;
+  }
+}
 /* Container for booking details in mobile layout */
 .bookingDetailsMobile {
   margin-top: 47px;
@@ -458,7 +479,28 @@
     display: none;
   }
 }
+.cancelButton{
+  z-index: 9;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 18px 24px 18px 24px;
 
+  /* Contain repainting to this component only */
+  /* 3D painting container helps scrolling */
+  transform: translate3d(0, 0, 0);
+
+  box-shadow: var(--boxShadowTop);
+
+  @media (--viewportLarge) {
+    z-index: unset;
+    position: static;
+    box-shadow: none;
+    width: 77%;
+    margin: 0 48px 0 48px;
+    padding: 0;
+  }
+}
 .desktopActionButtons {
   display: none;
 

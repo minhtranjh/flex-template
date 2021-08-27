@@ -27,6 +27,11 @@ import {
   txRoleIsCustomer,
   getUserTxRole,
   isRelevantPastTransition,
+  TRANSITION_CANCEL_BY_PROVIDER,
+  TRANSITION_CANCEL_BEFORE_BOOKING_ACCEPTED_BY_CUSTOMER,
+  TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER,
+  TRANSITION_CANCEL_WITH_NO_REFUND,
+  TRANSITION_CANCEL_WITH_FULL_REFUND,
 } from '../../util/transaction';
 import { propTypes } from '../../util/types';
 import * as log from '../../util/log';
@@ -145,6 +150,14 @@ const resolveTransitionMessage = (
       );
     case TRANSITION_CANCEL:
       return <FormattedMessage id="ActivityFeed.transitionCancel" />;
+    case TRANSITION_CANCEL_BEFORE_BOOKING_ACCEPTED_BY_CUSTOMER:
+      return <FormattedMessage id="ActivityFeed.transitionCancelByCustomer" />;
+    case TRANSITION_CANCEL_WITH_NO_REFUND ||
+      TRANSITION_CANCEL_WITH_FULL_REFUND ||
+      TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER:
+      return <FormattedMessage id="ActivityFeed.transitionCancelByCustomer" />;
+    case TRANSITION_CANCEL_BY_PROVIDER:
+      return <FormattedMessage id="ActivityFeed.transitionCancelByProvider" />;
     case TRANSITION_COMPLETE:
       // Show the leave a review link if the state is delivered and if the current user is the first to leave a review
       const reviewPeriodJustStarted = txIsDelivered(transaction);

@@ -12,6 +12,7 @@ import {
   txIsPaymentPending,
   txIsRequested,
   txHasBeenDelivered,
+  txIsTwoDaysPassed,
 } from '../../util/transaction';
 import { LINE_ITEM_NIGHT, LINE_ITEM_DAY, propTypes } from '../../util/types';
 import {
@@ -51,6 +52,7 @@ import PanelHeading, {
 } from './PanelHeading';
 
 import css from './TransactionPanel.module.css';
+import { PrimaryButton } from '../Button/Button';
 
 // Helper function to get display names for different roles
 const displayNames = (currentUser, currentProvider, currentCustomer, intl) => {
@@ -183,8 +185,13 @@ export class TransactionPanelComponent extends Component {
       intl,
       onAcceptSale,
       onDeclineSale,
+      onCancelAfterAccepted,
+      onCancelBeforeAccepted,
+      onCancelTransactionByProvider,
       acceptInProgress,
       declineInProgress,
+      cancelInProgress,
+      cancelError,
       acceptSaleError,
       declineSaleError,
       onSubmitBookingRequest,
@@ -241,19 +248,22 @@ export class TransactionPanelComponent extends Component {
           headingState: HEADING_REQUESTED,
           showDetailCardHeadings: isCustomer,
           showSaleButtons: isProvider && !isCustomerBanned,
+          showOrderCancelButton :  isCustomer,
         };
       } else if (txIsAccepted(tx)) {
         return {
           headingState: HEADING_ACCEPTED,
           showDetailCardHeadings: isCustomer,
           showAddress: isCustomer,
+          showOrderCancelButton: (isProvider && !isProviderBanned) || (isCustomer && !isCustomerBanned),
         };
       } else if (txIsDeclined(tx)) {
         return {
           headingState: HEADING_DECLINED,
           showDetailCardHeadings: isCustomer,
         };
-      } else if (txIsCanceled(tx)) {
+      } 
+      else if (txIsCanceled(tx)) {
         return {
           headingState: HEADING_CANCELED,
           showDetailCardHeadings: isCustomer,
@@ -269,7 +279,6 @@ export class TransactionPanelComponent extends Component {
       }
     };
     const stateData = stateDataFn(currentTransaction);
-
     const deletedListingTitle = intl.formatMessage({
       id: 'TransactionPanel.deletedListingTitle',
     });
@@ -316,7 +325,29 @@ export class TransactionPanelComponent extends Component {
         onDeclineSale={() => onDeclineSale(currentTransaction.id)}
       />
     );
+    const buttonsCancelDisabled = cancelInProgress;
 
+    const cancelButton = (
+      <>
+        {cancelError ? (
+          <p className={css.actionError}>
+            <FormattedMessage id="TransactionPanel.cancelFailed" />
+          </p>
+        ) : null}
+        <PrimaryButton
+          className={css.cancelButton}
+          inProgress={cancelInProgress}
+          disabled={buttonsCancelDisabled}
+          onClick={() => {
+            !txIsAccepted(currentTransaction)
+              ? onCancelBeforeAccepted(currentTransaction.id)
+              : isCustomer ? onCancelAfterBeforeAccepted(currentTransaction.id) : onCancelTransactionByProvider(currentTransaction.id)
+          }}
+        >
+          <FormattedMessage id="TransactionPanel.cancelButton" />
+        </PrimaryButton>
+      </>
+    );
     const showSendMessageForm =
       !isCustomerBanned && !isCustomerDeleted && !isProviderBanned && !isProviderDeleted;
 
@@ -416,6 +447,9 @@ export class TransactionPanelComponent extends Component {
             {stateData.showSaleButtons ? (
               <div className={css.mobileActionButtons}>{saleButtons}</div>
             ) : null}
+            {stateData.showOrderCancelButton ? (
+              <div className={css.mobileActionButtons}>{cancelButton}</div>
+            ) : null}
           </div>
 
           <div className={css.asideDesktop}>
@@ -456,7 +490,7 @@ export class TransactionPanelComponent extends Component {
                 />
               ) : null}
               <BreakdownMaybe
-              listingType={currentListing.attributes.publicData.listingType}
+                listingType={currentListing.attributes.publicData.listingType}
                 className={css.breakdownContainer}
                 transaction={currentTransaction}
                 transactionRole={transactionRole}
@@ -464,6 +498,9 @@ export class TransactionPanelComponent extends Component {
 
               {stateData.showSaleButtons ? (
                 <div className={css.desktopActionButtons}>{saleButtons}</div>
+              ) : null}
+              {stateData.showOrderCancelButton ? (
+                <div className={css.desktopActionButtons}>{cancelButton}</div>
               ) : null}
             </div>
           </div>

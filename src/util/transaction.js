@@ -40,6 +40,30 @@ export const TRANSITION_EXPIRE = 'transition/expire';
 // Admin can also cancel the transition.
 export const TRANSITION_CANCEL = 'transition/cancel';
 
+export const TRANSITION_CANCEL_BY_PROVIDER = 'transition/cancel-by-provider';
+
+export const TRANSITION_CANCEL_BEFORE_BOOKING_ACCEPTED_BY_CUSTOMER =
+  'transition/cancel-before-booking-accepted-by-customer';
+
+export const TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER =
+  'transition/cancel-after-booking-accepted-by-customer';
+
+export const TRANSITION_CANCEL_WITH_FULL_REFUND = 'transition/cancel-with-full-refund';
+
+export const TRANSITION_CANCEL_WITH_NO_REFUND = 'transition/cancel-with-no-refund';
+
+export const TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_DELIVERED =
+  'transition/pay-to-provider-after-three-days-at-delivered';
+
+export const TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_CUSTOMER_REVIEWED =
+  'transition/pay-to-provider-after-three-days-at-customer-reviewed';
+
+export const TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_PROVIDER_REVIEWED =
+  'transition/pay-to-provider-after-three-days-at-provider-reviewed';
+
+export const TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_REVIEWED =
+  'transition/pay-to-provider-after-three-days-at-reviewed';
+
 // The backend will mark the transaction completed.
 export const TRANSITION_COMPLETE = 'transition/complete';
 
@@ -89,11 +113,13 @@ const STATE_PAYMENT_EXPIRED = 'payment-expired';
 const STATE_PREAUTHORIZED = 'preauthorized';
 const STATE_DECLINED = 'declined';
 const STATE_ACCEPTED = 'accepted';
+const STATE_CANCELLED_BY_CUSTOMER = 'cancelled-by-customer';
 const STATE_CANCELED = 'canceled';
 const STATE_DELIVERED = 'delivered';
 const STATE_REVIEWED = 'reviewed';
 const STATE_REVIEWED_BY_CUSTOMER = 'reviewed-by-customer';
 const STATE_REVIEWED_BY_PROVIDER = 'reviewed-by-provider';
+const STATE_DECLINED_BY_OPERATOR = 'declined-by-operator';
 
 /**
  * Description of transaction process
@@ -108,7 +134,7 @@ const stateDescription = {
   // id is defined only to support Xstate format.
   // However if you have multiple transaction processes defined,
   // it is best to keep them in sync with transaction process aliases.
-  id: 'flex-default-process/release-1',
+  id: 'mint-test-process/release-1',
 
   // This 'initial' state is a starting point for new transaction
   initial: STATE_INITIAL,
@@ -140,6 +166,7 @@ const stateDescription = {
         [TRANSITION_DECLINE]: STATE_DECLINED,
         [TRANSITION_EXPIRE]: STATE_DECLINED,
         [TRANSITION_ACCEPT]: STATE_ACCEPTED,
+        [TRANSITION_CANCEL_BEFORE_BOOKING_ACCEPTED_BY_CUSTOMER]: STATE_CANCELLED_BY_CUSTOMER,
       },
     },
 
@@ -148,9 +175,16 @@ const stateDescription = {
       on: {
         [TRANSITION_CANCEL]: STATE_CANCELED,
         [TRANSITION_COMPLETE]: STATE_DELIVERED,
+        [TRANSITION_CANCEL_BY_PROVIDER]: STATE_CANCELED,
+        [TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER]: STATE_CANCELLED_BY_CUSTOMER,
       },
     },
-
+    [STATE_CANCELLED_BY_CUSTOMER]: {
+      on: {
+        [TRANSITION_CANCEL_WITH_FULL_REFUND]: STATE_CANCELED,
+        [TRANSITION_CANCEL_WITH_NO_REFUND]: STATE_CANCELED,
+      },
+    },
     [STATE_CANCELED]: {},
     [STATE_DELIVERED]: {
       on: {
@@ -240,8 +274,14 @@ export const txIsAccepted = tx =>
 export const txIsDeclined = tx =>
   getTransitionsToState(STATE_DECLINED).includes(txLastTransition(tx));
 
+export const txIsPreauthorized = tx => getTransitionsToState(STATE_PREAUTHORIZED).includes(txLastTransition(tx))
+
+const firstCancelTransitions = [
+  ...getTransitionsToState(STATE_CANCELED),
+  ...getTransitionsToState(STATE_CANCELLED_BY_CUSTOMER),
+]
 export const txIsCanceled = tx =>
-  getTransitionsToState(STATE_CANCELED).includes(txLastTransition(tx));
+firstCancelTransitions.includes(txLastTransition(tx));
 
 export const txIsDelivered = tx =>
   getTransitionsToState(STATE_DELIVERED).includes(txLastTransition(tx));
@@ -300,6 +340,15 @@ export const isRelevantPastTransition = transition => {
   return [
     TRANSITION_ACCEPT,
     TRANSITION_CANCEL,
+    TRANSITION_CANCEL_BY_PROVIDER,
+    TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER,
+    TRANSITION_CANCEL_BEFORE_BOOKING_ACCEPTED_BY_CUSTOMER,
+    TRANSITION_CANCEL_WITH_FULL_REFUND,
+    TRANSITION_CANCEL_WITH_NO_REFUND,
+    TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_DELIVERED,
+    TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_CUSTOMER_REVIEWED,
+    TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_PROVIDER_REVIEWED,
+    TRANSITION_PAY_TO_PROVIDER_AFTER_THREE_DAYS_AT_REVIEWED,
     TRANSITION_COMPLETE,
     TRANSITION_CONFIRM_PAYMENT,
     TRANSITION_DECLINE,

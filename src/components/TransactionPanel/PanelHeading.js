@@ -10,17 +10,25 @@ import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
 export const HEADING_ENQUIRED = 'enquired';
 export const HEADING_PAYMENT_PENDING = 'pending-payment';
 export const HEADING_PAYMENT_EXPIRED = 'payment-expired';
+export const HEADING_CANCELLED_BY_CUSTOMER = 'cancelled-by-customer';
 export const HEADING_REQUESTED = 'requested';
 export const HEADING_ACCEPTED = 'accepted';
 export const HEADING_DECLINED = 'declined';
 export const HEADING_CANCELED = 'canceled';
 export const HEADING_DELIVERED = 'delivered';
 
-const createListingLink = (listingId, label, listingDeleted,listingType, searchParams = {}, className = '') => {
+const createListingLink = (
+  listingId,
+  label,
+  listingDeleted,
+  listingType,
+  searchParams = {},
+  className = ''
+) => {
   if (!listingDeleted) {
-    const params = { id: listingId, slug: createSlug(label),listingType };
+    const params = { id: listingId, slug: createSlug(label), listingType };
     const to = { search: stringify(searchParams) };
-    if(listingType===EQUIPMENT_LISTING_TYPE){
+    if (listingType === EQUIPMENT_LISTING_TYPE) {
       return (
         <NamedLink className={className} name="EquipmentListingPage" params={params} to={to}>
           {label}
@@ -118,7 +126,7 @@ const PanelHeading = props => {
 
   const defaultRootClassName = isCustomer ? css.headingOrder : css.headingSale;
   const titleClasses = classNames(rootClassName || defaultRootClassName, className);
-  const listingLink = createListingLink(listingId, listingTitle, listingDeleted,listingType);
+  const listingLink = createListingLink(listingId, listingTitle, listingDeleted, listingType);
 
   switch (panelHeadingState) {
     case HEADING_ENQUIRED:
@@ -137,6 +145,7 @@ const PanelHeading = props => {
           isCustomerBanned={isCustomerBanned}
         />
       );
+
     case HEADING_PAYMENT_PENDING:
       return isCustomer ? (
         <HeadingCustomer
@@ -186,12 +195,17 @@ const PanelHeading = props => {
           subtitleValues={{ listingLink }}
         >
           {!listingDeleted ? (
-            <p className={css.transactionInfoMessage}>
-              <FormattedMessage
-                id="TransactionPanel.orderPreauthorizedInfo"
-                values={{ providerName }}
-              />
-            </p>
+            <>
+              <p className={css.transactionInfoMessage}>
+                <FormattedMessage
+                  id="TransactionPanel.orderPreauthorizedInfo"
+                  values={{ providerName }}
+                />
+              </p>
+              <p className={css.transactionAttentionMessage}>
+                <FormattedMessage id="TransactionPanel.orderNoteTwoDaysPassed" />
+              </p>
+            </>
           ) : null}
         </HeadingCustomerWithSubtitle>
       ) : (
@@ -215,7 +229,13 @@ const PanelHeading = props => {
           values={{ customerName }}
           subtitleId="TransactionPanel.orderAcceptedSubtitle"
           subtitleValues={{ listingLink }}
-        />
+        >
+          {!listingDeleted ? (
+            <p className={css.transactionAttentionMessage}>
+              <FormattedMessage id="TransactionPanel.orderNoteTwoDaysPassed" />
+            </p>
+          ) : null}
+        </HeadingCustomerWithSubtitle>
       ) : (
         <HeadingProvider
           className={titleClasses}
