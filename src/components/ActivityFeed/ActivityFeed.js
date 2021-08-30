@@ -152,10 +152,13 @@ const resolveTransitionMessage = (
       return <FormattedMessage id="ActivityFeed.transitionCancel" />;
     case TRANSITION_CANCEL_BEFORE_BOOKING_ACCEPTED_BY_CUSTOMER:
       return <FormattedMessage id="ActivityFeed.transitionCancelByCustomer" />;
-    case TRANSITION_CANCEL_WITH_NO_REFUND ||
-      TRANSITION_CANCEL_WITH_FULL_REFUND ||
-      TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER:
+    case TRANSITION_CANCEL_AFTER_BOOKING_ACCEPTED_BY_CUSTOMER :
       return <FormattedMessage id="ActivityFeed.transitionCancelByCustomer" />;
+    case TRANSITION_CANCEL_WITH_NO_REFUND : 
+      return <FormattedMessage id="ActivityFeed.transitionCancelWithNoRefund" />;
+    case     TRANSITION_CANCEL_WITH_FULL_REFUND:
+      return <FormattedMessage id="ActivityFeed.transitionCancelWithFullRefund" />;
+
     case TRANSITION_CANCEL_BY_PROVIDER:
       return <FormattedMessage id="ActivityFeed.transitionCancelByProvider" />;
     case TRANSITION_COMPLETE:

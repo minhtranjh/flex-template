@@ -8,6 +8,8 @@ import ContactDetailsPage from './ContactDetailsPage/ContactDetailsPage.duck';
 import EditListingPage from './EditListingPage/EditListingPage.duck';
 import InboxPage from './InboxPage/InboxPage.duck';
 import ListingPage from './ListingPage/ListingPage.duck';
+import EquipmentListingPage from './ListingPage/EquipmentListingPage.duck';
+
 import ManageListingsPage from './ManageListingsPage/ManageListingsPage.duck';
 import PasswordChangePage from './PasswordChangePage/PasswordChangePage.duck';
 import PasswordRecoveryPage from './PasswordRecoveryPage/PasswordRecoveryPage.duck';
@@ -35,4 +37,5 @@ export {
   SearchPage,
   StripePayoutPage,
   TransactionPage,
+  EquipmentListingPage
 };

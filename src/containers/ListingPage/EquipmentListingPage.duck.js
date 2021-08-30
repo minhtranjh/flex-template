@@ -7,7 +7,7 @@ import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { transactionLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
-import { TRANSITION_ENQUIRE } from '../../util/transaction';
+import { TRANSITIONS, TRANSITION_ENQUIRE } from '../../util/transaction';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -18,27 +18,30 @@ const { UUID } = sdkTypes;
 
 // ================ Action types ================ //
 
-export const SET_INITIAL_VALUES = 'app/ListingPage/SET_INITIAL_VALUES';
+export const SET_INITIAL_VALUES = 'app/EquipmentListingPage/SET_INITIAL_VALUES';
 
-export const SHOW_LISTING_REQUEST = 'app/ListingPage/SHOW_LISTING_REQUEST';
-export const SHOW_LISTING_ERROR = 'app/ListingPage/SHOW_LISTING_ERROR';
+export const SHOW_LISTING_REQUEST = 'app/EquipmentListingPage/SHOW_LISTING_REQUEST';
+export const SHOW_LISTING_ERROR = 'app/EquipmentListingPage/SHOW_LISTING_ERROR';
 
-export const FETCH_REVIEWS_REQUEST = 'app/ListingPage/FETCH_REVIEWS_REQUEST';
-export const FETCH_REVIEWS_SUCCESS = 'app/ListingPage/FETCH_REVIEWS_SUCCESS';
-export const FETCH_REVIEWS_ERROR = 'app/ListingPage/FETCH_REVIEWS_ERROR';
+export const FETCH_REVIEWS_REQUEST = 'app/EquipmentListingPage/FETCH_REVIEWS_REQUEST';
+export const FETCH_REVIEWS_SUCCESS = 'app/EquipmentListingPage/FETCH_REVIEWS_SUCCESS';
+export const FETCH_REVIEWS_ERROR = 'app/EquipmentListingPage/FETCH_REVIEWS_ERROR';
 
-export const FETCH_TIME_SLOTS_REQUEST = 'app/ListingPage/FETCH_TIME_SLOTS_REQUEST';
-export const FETCH_TIME_SLOTS_SUCCESS = 'app/ListingPage/FETCH_TIME_SLOTS_SUCCESS';
-export const FETCH_TIME_SLOTS_ERROR = 'app/ListingPage/FETCH_TIME_SLOTS_ERROR';
+export const FETCH_TIME_SLOTS_REQUEST = 'app/EquipmentListingPage/FETCH_TIME_SLOTS_REQUEST';
+export const FETCH_TIME_SLOTS_SUCCESS = 'app/EquipmentListingPage/FETCH_TIME_SLOTS_SUCCESS';
+export const FETCH_TIME_SLOTS_ERROR = 'app/EquipmentListingPage/FETCH_TIME_SLOTS_ERROR';
 
-export const FETCH_LINE_ITEMS_REQUEST = 'app/ListingPage/FETCH_LINE_ITEMS_REQUEST';
-export const FETCH_LINE_ITEMS_SUCCESS = 'app/ListingPage/FETCH_LINE_ITEMS_SUCCESS';
-export const FETCH_LINE_ITEMS_ERROR = 'app/ListingPage/FETCH_LINE_ITEMS_ERROR';
+export const FETCH_LINE_ITEMS_REQUEST = 'app/EquipmentListingPage/FETCH_LINE_ITEMS_REQUEST';
+export const FETCH_LINE_ITEMS_SUCCESS = 'app/EquipmentListingPage/FETCH_LINE_ITEMS_SUCCESS';
+export const FETCH_LINE_ITEMS_ERROR = 'app/EquipmentListingPage/FETCH_LINE_ITEMS_ERROR';
 
-export const SEND_ENQUIRY_REQUEST = 'app/ListingPage/SEND_ENQUIRY_REQUEST';
-export const SEND_ENQUIRY_SUCCESS = 'app/ListingPage/SEND_ENQUIRY_SUCCESS';
-export const SEND_ENQUIRY_ERROR = 'app/ListingPage/SEND_ENQUIRY_ERROR';
+export const SEND_ENQUIRY_REQUEST = 'app/EquipmentListingPage/SEND_ENQUIRY_REQUEST';
+export const SEND_ENQUIRY_SUCCESS = 'app/EquipmentListingPage/SEND_ENQUIRY_SUCCESS';
+export const SEND_ENQUIRY_ERROR = 'app/EquipmentListingPage/SEND_ENQUIRY_ERROR';
 
+export const FETCH_ORDERS_REQUEST = 'app/EquipmentListingPage/FETCH_ORDERS_REQUEST';
+export const FETCH_ORDERS_SUCCESS = 'app/EquipmentListingPage/FETCH_ORDERS_SUCCESS';
+export const FETCH_ORDERS_ERROR = 'app/EquipmentListingPage/FETCH_ORDERS_ERROR';
 // ================ Reducer ================ //
 
 const initialState = {
@@ -54,7 +57,17 @@ const initialState = {
   sendEnquiryInProgress: false,
   sendEnquiryError: null,
   enquiryModalOpenForListingId: null,
+  fetchOrdersInProgress: false,
+  fetchOrdersError: null,
+  orders: [],
 };
+
+const entityRefs = entities =>
+  entities.map(entity => ({
+    id: entity.id,
+    type: entity.type,
+  }));
+
 
 const listingPageReducer = (state = initialState, action = {}) => {
   const { type, payload } = action;
@@ -94,6 +107,12 @@ const listingPageReducer = (state = initialState, action = {}) => {
       return { ...state, sendEnquiryInProgress: false };
     case SEND_ENQUIRY_ERROR:
       return { ...state, sendEnquiryInProgress: false, sendEnquiryError: payload };
+    case FETCH_ORDERS_REQUEST:
+      return { ...state, fetchOrdersInProgress: true, fetchOrdersError: null };
+    case FETCH_ORDERS_SUCCESS:
+      return { ...state, fetchOrdersInProgress: false, orders: entityRefs(payload.data.data) };
+    case FETCH_ORDERS_ERROR:
+      return { ...state, fetchOrdersInProgress: false, fetchOrdersError: payload };
 
     default:
       return state;
@@ -153,6 +172,17 @@ export const fetchLineItemsError = error => ({
 export const sendEnquiryRequest = () => ({ type: SEND_ENQUIRY_REQUEST });
 export const sendEnquirySuccess = () => ({ type: SEND_ENQUIRY_SUCCESS });
 export const sendEnquiryError = e => ({ type: SEND_ENQUIRY_ERROR, error: true, payload: e });
+
+const fetchOrdersRequest = () => ({ type: FETCH_ORDERS_REQUEST });
+const fetchOrdersSuccess = response => ({
+  type: FETCH_ORDERS_SUCCESS,
+  payload: response,
+});
+const fetchOrdersError = e => ({
+  type: FETCH_ORDERS_ERROR,
+  error: true,
+  payload: e,
+});
 
 // ================ Thunks ================ //
 
@@ -221,8 +251,7 @@ const timeSlotsRequest = params => (dispatch, getState, sdk) => {
   });
 };
 
-
-export const fetchTimeSlots = (listingId,startDate,endDate) => (dispatch, getState, sdk) => {
+export const fetchTimeSlots = (listingId, startDate, endDate) => (dispatch, getState, sdk) => {
   dispatch(fetchTimeSlotsRequest);
 
   // Time slots can be fetched for 90 days at a time,
@@ -234,15 +263,15 @@ export const fetchTimeSlots = (listingId,startDate,endDate) => (dispatch, getSta
   const bookingRange = config.dayCountAvailableForBooking - 1;
   const timeSlotsRange = Math.min(bookingRange, maxTimeSlots);
 
-  const start =  moment
+  const start = moment
     .utc()
     .startOf('day')
-    .toDate()
-  const end =  moment()
+    .toDate();
+  const end = moment()
     .utc()
     .startOf('day')
     .add(timeSlotsRange, 'days')
-    .toDate()
+    .toDate();
   const params = { listingId, start, end };
   return dispatch(timeSlotsRequest(params))
     .then(timeSlots => {
@@ -311,9 +340,32 @@ export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing
     });
 };
 
+export const fetchOrders = (params, search) => (dispatch, getState, sdk) => {
+  dispatch(fetchOrdersRequest());
+  const apiQueryParams = {
+    only: "order",
+    lastTransitions: TRANSITIONS,
+    page: 1,
+    per_page: 2,
+  };
+
+  return sdk.transactions
+    .query(apiQueryParams)
+    .then(response => {
+      dispatch(addMarketplaceEntities(response));
+      dispatch(fetchOrdersSuccess(response));
+      return response;
+    })
+    .catch(e => {
+      dispatch(fetchOrdersError(storableError(e)));
+      throw e;
+    });
+};
+
 export const loadData = (params, search) => dispatch => {
   const listingId = new UUID(params.id);
 
+  dispatch(fetchOrders())
   const ownListingVariants = [LISTING_PAGE_DRAFT_VARIANT, LISTING_PAGE_PENDING_APPROVAL_VARIANT];
   if (ownListingVariants.includes(params.variant)) {
     return dispatch(showListing(listingId, true));

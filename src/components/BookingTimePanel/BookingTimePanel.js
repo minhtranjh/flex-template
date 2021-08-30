@@ -70,15 +70,11 @@ const BookingTimePanel = props => {
     lineItems,
     fetchLineItemsInProgress,
     fetchLineItemsError,
-    onFetchTimeSlots
+    onFetchTimeSlots,
+    isFirstBooking
   } = props;
 
   const price = listing.attributes.price;
-  const cleaningFee =
-    listing.attributes.publicData && listing.attributes.publicData.cleaningFee
-      ? listing.attributes.publicData.cleaningFee
-      : null;
-
   const hasListingState = !!listing.attributes.state;
   const isClosed = hasListingState && listing.attributes.state === LISTING_STATE_CLOSED;
   const showBookingDatesForm = hasListingState && !isClosed;
@@ -151,7 +147,7 @@ const BookingTimePanel = props => {
             canHourlyBooking={canHourlyBooking()}
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
-            cleaningFee={cleaningFee}
+            isFirstBooking={isFirstBooking}
           />
         ) : null}
       </ModalInMobile>

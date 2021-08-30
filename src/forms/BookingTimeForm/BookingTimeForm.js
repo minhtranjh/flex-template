@@ -1,21 +1,14 @@
 import React, { Component } from 'react';
 import { string, bool, arrayOf, array, func } from 'prop-types';
 import { compose } from 'redux';
-import { formatMoney } from '../../util/currency';
-import { types as sdkTypes } from '../../util/sdkLoader';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
 import classNames from 'classnames';
 import moment from 'moment';
 import config from '../../config';
 import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
-import { required, bookingDatesRequired, composeValidators } from '../../util/validators';
 import { START_DATE, END_DATE } from '../../util/dates';
 import { propTypes } from '../../util/types';
-import {
-  Form,
-  IconSpinner,
-  PrimaryButton,
-} from '../../components';
+import { Form, IconSpinner, PrimaryButton } from '../../components';
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
 import FieldDateAndTimeInput from './FieldDateAndTimeInput';
 import css from './BookingTimeForm.module.css';
@@ -88,22 +81,23 @@ export class BookingTimeFormComponent extends Component {
     const listingId = this.props.listingId;
     const isOwnListing = this.props.isOwnListing;
 
-    const isSameDate = ()=>{
-      const start = new Date(startDate).getTime()
-      const end = new Date(endDate).getTime()
-      return start===end
-    }
     if (
       startDate &&
       endDate &&
       startTime &&
       endTime &&
       bookingDisplayEnd &&
-      bookingDisplayStart && !isSameDate()&&
+      bookingDisplayStart &&
       !this.props.fetchLineItemsInProgress
     ) {
       this.props.onFetchTransactionLineItems({
-        bookingData: { startDate, endDate, bookingDisplayStart, bookingDisplayEnd },
+        bookingData: {
+          isFirstBooking : this.props.isFirstBooking,
+          startDate,
+          endDate,
+          bookingDisplayStart,
+          bookingDisplayEnd,
+        },
         listingId,
         isOwnListing,
       });
@@ -196,8 +190,8 @@ export class BookingTimeFormComponent extends Component {
             startDate && endDate && displayStart && displayEnd
               ? {
                   unitType,
-                  startDate : startDate.date,
-                  endDate : endDate.date,
+                  startDate: startDate.date,
+                  endDate: endDate.date,
                   displayStart,
                   displayEnd,
                 }
@@ -210,7 +204,7 @@ export class BookingTimeFormComponent extends Component {
               <h3 className={css.priceBreakdownTitle}>
                 <FormattedMessage id="BookingDatesForm.priceBreakdownTitle" />
               </h3>
-              <EstimatedBreakdownMaybe  bookingData={bookingData} lineItems={lineItems} />
+              <EstimatedBreakdownMaybe bookingData={bookingData} lineItems={lineItems} />
             </div>
           ) : null;
 
@@ -256,7 +250,7 @@ export class BookingTimeFormComponent extends Component {
             startDateInputProps,
             endDateInputProps,
           };
-          const timeZone = getLocalTimeZone()
+          const timeZone = getLocalTimeZone();
           return (
             <Form onSubmit={handleSubmit} className={classes} enforcePagePreloadFor="CheckoutPage">
               {timeSlotsError}
@@ -269,6 +263,7 @@ export class BookingTimeFormComponent extends Component {
               <FieldDateAndTimeInput
                 {...dateInputProps}
                 startDate={startDate}
+                canHourlyBooking={canHourlyBooking}
                 endDate={endDate}
                 formId={formId}
                 className={css.bookingDates}

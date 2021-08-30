@@ -1,4 +1,7 @@
-const { calculateQuantityFromDates, calculateTotalFromLineItems } = require('./lineItemHelpers');
+const {
+  calculateQuantityFromDates,
+  calculateTotalFromLineItems,
+} = require('./lineItemHelpers');
 const { types } = require('sharetribe-flex-sdk');
 const { Money } = types;
 
@@ -6,6 +9,8 @@ const { Money } = types;
 // line-item/night, line-item/day or line-item/units
 const bookingUnitType = 'line-item/night';
 const PROVIDER_COMMISSION_PERCENTAGE = -25;
+const CUSTOMER_FIRST_BOOKING_PERCENTAGE = 15;
+const CUSTOMER_NOT_FIRST_BOOKING_PERCENTAGE = 55;
 
 /** Returns collection of lineItems (max 50)
  *
@@ -41,7 +46,7 @@ const resolveCleaningFeePrice = listing => {
 
 exports.transactionLineItems = (listing, bookingData) => {
   const unitPrice = listing.attributes.price;
-  const { startDate, endDate, hasCleaningFee } = bookingData;
+  const { startDate, endDate, hasCleaningFee, isFirstBooking } = bookingData;
 
   /**
    * If you want to use pre-defined component and translations for printing the lineItems base price for booking,
@@ -59,6 +64,7 @@ exports.transactionLineItems = (listing, bookingData) => {
     quantity: calculateQuantityFromDates(startDate, endDate, bookingUnitType),
     includeFor: ['customer', 'provider'],
   };
+ 
   const cleaningFeePrice = hasCleaningFee ? resolveCleaningFeePrice(listing) : null;
   const cleaningFee = cleaningFeePrice
     ? [
@@ -70,13 +76,28 @@ exports.transactionLineItems = (listing, bookingData) => {
         },
       ]
     : [];
+
+    const customerCommission =  [{
+      code :'line-item/customer-commission',
+      unitPrice,
+      includeFor: ['customer'],
+      percentage : isFirstBooking ? CUSTOMER_FIRST_BOOKING_PERCENTAGE : CUSTOMER_NOT_FIRST_BOOKING_PERCENTAGE
+    }] 
+    
   const providerCommission = {
     code: 'line-item/provider-commission',
-    unitPrice: calculateTotalFromLineItems([booking, ...cleaningFee]),
+    unitPrice: calculateTotalFromLineItems([
+      booking,
+      ...cleaningFee,
+    ]),
     percentage: PROVIDER_COMMISSION_PERCENTAGE,
     includeFor: ['provider'],
   };
-
-  const lineItems = [booking, ...cleaningFee, providerCommission];
+  const lineItems = [
+    booking,
+    ...customerCommission,
+    ...cleaningFee,
+    providerCommission,
+  ];
   return lineItems;
 };

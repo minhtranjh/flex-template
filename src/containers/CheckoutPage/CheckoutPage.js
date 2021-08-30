@@ -150,7 +150,7 @@ export class CheckoutPageComponent extends Component {
       history,
     } = this.props;
 
-    // Fetch currentUser with stripeCustomer entity
+  // Fetch currentUser with stripeCustomer entity
     // Note: since there's need for data loading in "componentWillMount" function,
     //       this is added here instead of loadData static function.
     fetchStripeCustomer();
@@ -190,7 +190,7 @@ export class CheckoutPageComponent extends Component {
       const listingId = pageData.listing.id;
       const transactionId = tx ? tx.id : null;
       const { bookingStart, bookingEnd } = pageData.bookingDates;
-      const { displayStart, displayEnd } = pageData.bookingData;
+      const { displayStart, displayEnd,isFirstBooking } = pageData.bookingData;
       // Convert picked date to date that will be converted on the API as
       // a noon of correct year-month-date combo in UTC
       const bookingStartForAPI = dateFromLocalToAPI(bookingStart);
@@ -206,6 +206,7 @@ export class CheckoutPageComponent extends Component {
           bookingEnd: bookingEndForAPI,
           bookingDisplayStart: displayStart,
           bookingDisplayEnd: displayEnd,
+          isFirstBooking
         },
         transactionId
       );
@@ -562,7 +563,7 @@ export class CheckoutPageComponent extends Component {
     if (isLoading) {
       return <Page {...pageProps}>{topbar}</Page>;
     }
-
+    
     const isOwnListing =
       currentUser &&
       currentUser.id &&

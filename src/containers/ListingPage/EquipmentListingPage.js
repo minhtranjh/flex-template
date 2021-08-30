@@ -37,7 +37,6 @@ import {
   LayoutWrapperMain,
   LayoutWrapperFooter,
   Footer,
-  BookingPanel,
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '..';
 
@@ -60,6 +59,7 @@ import SectionManufactureYearMaybe from './SectionManufactureYearMaybe';
 import SectionMaxUsingTimeADay from './SectionMaxUsingTimeADay';
 import BookingTimePanel from '../../components/BookingTimePanel/BookingTimePanel';
 import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
+import { isSameDay } from '../../util/time';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -105,6 +105,7 @@ export class EquipmentListingPageComponent extends Component {
       params,
       callSetInitialValues,
       onInitializeCardPaymentData,
+      orders
     } = this.props;
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
@@ -123,6 +124,7 @@ export class EquipmentListingPageComponent extends Component {
         ...bookingData,
         displayStart: bookingDisplayStart,
         displayEnd: bookingDisplayEnd,
+        isFirstBooking : orders.length===0,
       },
       bookingDates: {
         bookingStart: bookingStartDate.date,
@@ -213,6 +215,7 @@ export class EquipmentListingPageComponent extends Component {
       lineItems,
       fetchLineItemsInProgress,
       fetchLineItemsError,
+      orders,
     } = this.props;
     const listingId = new UUID(rawParams.id);
     const isPendingApprovalVariant = rawParams.variant === LISTING_PAGE_PENDING_APPROVAL_VARIANT;
@@ -223,15 +226,13 @@ export class EquipmentListingPageComponent extends Component {
         : ensureListing(getListing(listingId));
     const listingSlug = rawParams.slug || createSlug(currentListing.attributes.title || '');
     const params = { slug: listingSlug, ...rawParams };
-
     const listingType = isDraftVariant
       ? LISTING_PAGE_PARAM_TYPE_DRAFT
       : LISTING_PAGE_PARAM_TYPE_EDIT;
     const listingTab = isDraftVariant ? 'photos' : 'description';
-
     const isApproved =
       currentListing.id && currentListing.attributes.state !== LISTING_STATE_PENDING_APPROVAL;
-
+    const isFirstBooking = orders.length===0 
     const pendingIsApproved = isPendingApprovalVariant && isApproved;
 
     // If a /pending-approval URL is shared, the UI requires
@@ -339,6 +340,7 @@ export class EquipmentListingPageComponent extends Component {
 
     const currentAuthor = authorAvailable ? currentListing.author : null;
     const ensuredAuthor = ensureUser(currentAuthor);
+
 
     // When user is banned or deleted the listing is also deleted.
     // Because listing can be never showed with banned or deleted user we don't have to provide
@@ -497,6 +499,7 @@ export class EquipmentListingPageComponent extends Component {
                   lineItems={lineItems}
                   fetchLineItemsInProgress={fetchLineItemsInProgress}
                   fetchLineItemsError={fetchLineItemsError}
+                  isFirstBooking={isFirstBooking}
                 />
               </div>
             </div>
@@ -587,7 +590,8 @@ const mapStateToProps = state => {
     fetchLineItemsInProgress,
     fetchLineItemsError,
     enquiryModalOpenForListingId,
-  } = state.ListingPage;
+    orders
+  } = state.EquipmentListingPage;
   const { currentUser } = state.user;
 
   const getListing = id => {
@@ -619,6 +623,7 @@ const mapStateToProps = state => {
     fetchLineItemsError,
     sendEnquiryInProgress,
     sendEnquiryError,
+    orders,
   };
 };
 

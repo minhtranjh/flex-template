@@ -312,6 +312,7 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
   const bookingData = {
     startDate: orderParams.bookingStart,
     endDate: orderParams.bookingEnd,
+    isFirstBooking : orderParams.isFirstBooking,
   };
 
   const params = {
@@ -354,7 +355,6 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
     });
     return dispatch(speculateTransactionError(storableError(e)));
   };
-
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
     return transitionPrivileged({ isSpeculative: true, bookingData, bodyParams, queryParams })
