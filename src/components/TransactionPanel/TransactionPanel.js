@@ -341,7 +341,7 @@ export class TransactionPanelComponent extends Component {
           onClick={() => {
             !txIsAccepted(currentTransaction)
               ? onCancelBeforeAccepted(currentTransaction.id)
-              : isCustomer ? onCancelAfterBeforeAccepted(currentTransaction.id) : onCancelTransactionByProvider(currentTransaction.id)
+              : isCustomer ? onCancelAfterAccepted(currentTransaction.id) : onCancelTransactionByProvider(currentTransaction.id)
           }}
         >
           <FormattedMessage id="TransactionPanel.cancelButton" />
