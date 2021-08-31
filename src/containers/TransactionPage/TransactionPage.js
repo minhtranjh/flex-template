@@ -39,6 +39,7 @@ import {
   cancelAfterAccepted,
 } from './TransactionPage.duck';
 import css from './TransactionPage.module.css';
+import { EQUIPMENT_LISTING_TYPE } from '../../components/EditListingWizard/EditListingWizard';
 
 const PROVIDER = 'provider';
 const CUSTOMER = 'customer';
@@ -89,6 +90,7 @@ export const TransactionPageComponent = props => {
     lineItems,
     fetchLineItemsInProgress,
     fetchLineItemsError,
+    isFirstBooking
   } = props;
 
   const currentTransaction = ensureTransaction(transaction);
@@ -101,7 +103,7 @@ export const TransactionPageComponent = props => {
     // Customize checkout page state with current listing and selected bookingDates
     const { setInitialValues } = findRouteByRouteName('CheckoutPage', routes);
     callSetInitialValues(setInitialValues, initialValues);
-
+    const listingType = currentListing.attributes.publicData.listingType
     // Clear previous Stripe errors from store if there is any
     onInitializeCardPaymentData();
 
@@ -110,7 +112,7 @@ export const TransactionPageComponent = props => {
       createResourceLocatorString(
         'CheckoutPage',
         routes,
-        { id: currentListing.id.uuid, slug: createSlug(currentListing.attributes.title) },
+        { listingType, id: currentListing.id.uuid, slug: createSlug(currentListing.attributes.title) },
         {}
       )
     );
@@ -142,9 +144,16 @@ export const TransactionPageComponent = props => {
   }
 
   // Customer can create a booking, if the tx is in "enquiry" state.
+  const listingType = currentListing.attributes.publicData.listingType;
   const handleSubmitBookingRequest = values => {
+    if (listingType === EQUIPMENT_LISTING_TYPE) {
+      handleSubmitEquipmentBookingRequest(values);
+      return;
+    }
+    handleSubmitDefaultBookingRequest(values);
+  };
+  const handleSubmitDefaultBookingRequest = values => {
     const { bookingDates, ...bookingData } = values;
-
     const initialValues = {
       listing: currentListing,
       // enquired transaction should be passed to CheckoutPage
@@ -156,8 +165,32 @@ export const TransactionPageComponent = props => {
       },
       confirmPaymentError: null,
     };
-
     redirectToCheckoutPageWithInitialValues(initialValues, currentListing);
+  };
+  const handleSubmitEquipmentBookingRequest = values => {
+    const {
+      bookingStartDate,
+      bookingEndDate,
+      bookingDisplayStart,
+      bookingDisplayEnd,
+      ...bookingData
+    } = values;
+
+    const initialValues = {
+      listing : currentListing,
+      bookingData: {
+        ...bookingData,
+        displayStart: bookingDisplayStart,
+        displayEnd: bookingDisplayEnd,
+        isFirstBooking: isFirstBooking,
+      },
+      bookingDates: {
+        bookingStart: bookingStartDate.date,
+        bookingEnd: bookingEndDate.date,
+      },
+      confirmPaymentError: null,
+    };
+    redirectToCheckoutPageWithInitialValues(initialValues,currentListing)
   };
 
   const deletedListingTitle = intl.formatMessage({
@@ -263,6 +296,7 @@ export const TransactionPageComponent = props => {
       lineItems={lineItems}
       fetchLineItemsInProgress={fetchLineItemsInProgress}
       fetchLineItemsError={fetchLineItemsError}
+      isFirstBooking={isFirstBooking}
     />
   ) : (
     loadingOrFailedFetching
@@ -412,7 +446,7 @@ const mapStateToProps = state => {
     fetchLineItemsInProgress,
     fetchLineItemsError,
     cancelInProgress,
-    cancelError
+    cancelError,
   };
 };
 
@@ -420,9 +454,10 @@ const mapDispatchToProps = dispatch => {
   return {
     onAcceptSale: transactionId => dispatch(acceptSale(transactionId)),
     onDeclineSale: transactionId => dispatch(declineSale(transactionId)),
-    onCancelBeforeAccepted : transactionId => dispatch(cancelBeforeAccepted(transactionId)),
-    onCancelAfterAccepted : transactionId => dispatch(cancelAfterAccepted(transactionId)),
-    onCancelTransactionByProvider : transactionId => dispatch(cancelTransactionByProvider(transactionId)),
+    onCancelBeforeAccepted: transactionId => dispatch(cancelBeforeAccepted(transactionId)),
+    onCancelAfterAccepted: transactionId => dispatch(cancelAfterAccepted(transactionId)),
+    onCancelTransactionByProvider: transactionId =>
+      dispatch(cancelTransactionByProvider(transactionId)),
     onShowMoreMessages: txId => dispatch(fetchMoreMessages(txId)),
     onSendMessage: (txId, message) => dispatch(sendMessage(txId, message)),
     onManageDisableScrolling: (componentId, disableScrolling) =>

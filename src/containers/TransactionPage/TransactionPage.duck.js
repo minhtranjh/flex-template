@@ -75,6 +75,12 @@ export const FETCH_LINE_ITEMS_REQUEST = 'app/TransactionPage/FETCH_LINE_ITEMS_RE
 export const FETCH_LINE_ITEMS_SUCCESS = 'app/TransactionPage/FETCH_LINE_ITEMS_SUCCESS';
 export const FETCH_LINE_ITEMS_ERROR = 'app/TransactionPage/FETCH_LINE_ITEMS_ERROR';
 
+export const CHECK_IS_FIRST_BOOKING_REQUEST = 'app/TransactionPage/CHECK_IS_FIRST_BOOKING_REQUEST'
+export const CHECK_IS_FIRST_BOOKING_SUCCESS= 'app/TransactionPage/CHECK_IS_FIRST_BOOKING_SUCCESS'
+export const CHECK_IS_FIRST_BOOKING_ERROR= 'app/TransactionPage/CHECK_IS_FIRST_BOOKING_ERROR'
+
+
+
 // ================ Reducer ================ //
 
 const initialState = {
@@ -107,6 +113,7 @@ const initialState = {
   lineItems: null,
   fetchLineItemsInProgress: false,
   fetchLineItemsError: null,
+  isFirstBooking:false,
 };
 
 // Merge entity arrays using ids, so that conflicting items in newer array (b) overwrite old values (a).
@@ -215,7 +222,13 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
       return { ...state, fetchLineItemsInProgress: false, lineItems: payload };
     case FETCH_LINE_ITEMS_ERROR:
       return { ...state, fetchLineItemsInProgress: false, fetchLineItemsError: payload };
-
+    case CHECK_IS_FIRST_BOOKING_REQUEST : 
+      return {...state};
+    case CHECK_IS_FIRST_BOOKING_SUCCESS : 
+      const isFirstBooking = !(payload.data.data.length !==0)
+      return {...state,isFirstBooking}
+    case CHECK_IS_FIRST_BOOKING_ERROR:
+      return {...state}
     default:
       return state;
   }
@@ -299,6 +312,18 @@ export const fetchLineItemsError = error => ({
   error: true,
   payload: error,
 });
+
+const checkIsFirstBookingRequest = () => ({ type: CHECK_IS_FIRST_BOOKING_REQUEST });
+const checkIsFirstBookingSuccess = response => ({
+  type: CHECK_IS_FIRST_BOOKING_SUCCESS,
+  payload: response,
+});
+const checkIsFirstBookingError = () => ({
+  type: CHECK_IS_FIRST_BOOKING_ERROR,
+  error: true,
+  payload: e,
+});
+
 
 // ================ Thunks ================ //
 
@@ -625,6 +650,25 @@ const sendReviewAsFirst = (id, params, role, dispatch, sdk) => {
     });
 };
 
+export const checkIsFirstBooking = () =>(dispatch, getState, sdk)=>{
+  dispatch(checkIsFirstBookingRequest());
+  const apiQueryParams = {
+    only: "order",
+    page: 1,
+    per_page: 1,
+  };
+  return sdk.transactions
+    .query(apiQueryParams)
+    .then(response => {
+      dispatch(checkIsFirstBookingSuccess(response));
+      return response;
+    })
+    .catch(e => {
+      dispatch(checkIsFirstBookingError(storableError(e)));
+      throw e;
+    });
+}
+
 export const sendReview = (role, tx, reviewRating, reviewContent) => (dispatch, getState, sdk) => {
   const params = { reviewRating, reviewContent };
 
@@ -745,5 +789,6 @@ export const loadData = params => (dispatch, getState) => {
     dispatch(fetchTransaction(txId, txRole)),
     dispatch(fetchMessages(txId, 1)),
     dispatch(fetchNextTransitions(txId)),
+    dispatch(checkIsFirstBooking())
   ]);
 };

@@ -53,6 +53,8 @@ import PanelHeading, {
 
 import css from './TransactionPanel.module.css';
 import { PrimaryButton } from '../Button/Button';
+import { EQUIPMENT_LISTING_TYPE } from '../EditListingWizard/EditListingWizard';
+import BookingTimePanel from '../BookingTimePanel/BookingTimePanel';
 
 // Helper function to get display names for different roles
 const displayNames = (currentUser, currentProvider, currentCustomer, intl) => {
@@ -202,6 +204,7 @@ export class TransactionPanelComponent extends Component {
       lineItems,
       fetchLineItemsInProgress,
       fetchLineItemsError,
+      isFirstBooking
     } = this.props;
 
     const currentTransaction = ensureTransaction(transaction);
@@ -248,22 +251,22 @@ export class TransactionPanelComponent extends Component {
           headingState: HEADING_REQUESTED,
           showDetailCardHeadings: isCustomer,
           showSaleButtons: isProvider && !isCustomerBanned,
-          showOrderCancelButton :  isCustomer,
+          showOrderCancelButton: isCustomer,
         };
       } else if (txIsAccepted(tx)) {
         return {
           headingState: HEADING_ACCEPTED,
           showDetailCardHeadings: isCustomer,
           showAddress: isCustomer,
-          showOrderCancelButton: (isProvider && !isProviderBanned) || (isCustomer && !isCustomerBanned),
+          showOrderCancelButton:
+            (isProvider && !isProviderBanned) || (isCustomer && !isCustomerBanned),
         };
       } else if (txIsDeclined(tx)) {
         return {
           headingState: HEADING_DECLINED,
           showDetailCardHeadings: isCustomer,
         };
-      } 
-      else if (txIsCanceled(tx)) {
+      } else if (txIsCanceled(tx)) {
         return {
           headingState: HEADING_CANCELED,
           showDetailCardHeadings: isCustomer,
@@ -341,7 +344,9 @@ export class TransactionPanelComponent extends Component {
           onClick={() => {
             !txIsAccepted(currentTransaction)
               ? onCancelBeforeAccepted(currentTransaction.id)
-              : isCustomer ? onCancelAfterAccepted(currentTransaction.id) : onCancelTransactionByProvider(currentTransaction.id)
+              : isCustomer
+              ? onCancelAfterAccepted(currentTransaction.id)
+              : onCancelTransactionByProvider(currentTransaction.id);
           }}
         >
           <FormattedMessage id="TransactionPanel.cancelButton" />
@@ -367,7 +372,51 @@ export class TransactionPanelComponent extends Component {
     );
 
     const classes = classNames(rootClassName || css.root, className);
-
+    const listingType = currentListing.attributes.publicData.listingType;
+    const bookingPanel = () => {
+      switch (listingType) {
+        case EQUIPMENT_LISTING_TYPE:
+         return <BookingTimePanel
+            intl={intl}
+            className={css.bookingPanel}
+            titleClassName={css.bookingTitle}
+            listing={currentListing}
+            isOwnListing={false}
+            bookingSubTitle={bookingSubTitle}
+            unitType={unitType}
+            onSubmit={onSubmitBookingRequest}
+            title={listingTitle}
+            authorDisplayName={authorDisplayName}
+            onManageDisableScrolling={onManageDisableScrolling}
+            timeSlots={timeSlots}
+            onFetchTransactionLineItems={onFetchTransactionLineItems}
+            lineItems={lineItems}
+            fetchLineItemsInProgress={fetchLineItemsInProgress}
+            fetchLineItemsError={fetchLineItemsError}
+            isFirstBooking={isFirstBooking}
+          />;
+        default:
+          return (
+            <BookingPanel
+              className={css.bookingPanel}
+              titleClassName={css.bookingTitle}
+              isOwnListing={false}
+              listing={currentListing}
+              title={listingTitle}
+              subTitle={bookingSubTitle}
+              authorDisplayName={authorDisplayName}
+              onSubmit={onSubmitBookingRequest}
+              onManageDisableScrolling={onManageDisableScrolling}
+              timeSlots={timeSlots}
+              fetchTimeSlotsError={fetchTimeSlotsError}
+              onFetchTransactionLineItems={onFetchTransactionLineItems}
+              lineItems={lineItems}
+              fetchLineItemsInProgress={fetchLineItemsInProgress}
+              fetchLineItemsError={fetchLineItemsError}
+            />
+          );
+      }
+    };
     return (
       <div className={classes}>
         <div className={css.container}>
@@ -471,23 +520,7 @@ export class TransactionPanelComponent extends Component {
                 showAddress={stateData.showAddress}
               />
               {stateData.showBookingPanel ? (
-                <BookingPanel
-                  className={css.bookingPanel}
-                  titleClassName={css.bookingTitle}
-                  isOwnListing={false}
-                  listing={currentListing}
-                  title={listingTitle}
-                  subTitle={bookingSubTitle}
-                  authorDisplayName={authorDisplayName}
-                  onSubmit={onSubmitBookingRequest}
-                  onManageDisableScrolling={onManageDisableScrolling}
-                  timeSlots={timeSlots}
-                  fetchTimeSlotsError={fetchTimeSlotsError}
-                  onFetchTransactionLineItems={onFetchTransactionLineItems}
-                  lineItems={lineItems}
-                  fetchLineItemsInProgress={fetchLineItemsInProgress}
-                  fetchLineItemsError={fetchLineItemsError}
-                />
+                bookingPanel()
               ) : null}
               <BreakdownMaybe
                 listingType={currentListing.attributes.publicData.listingType}
