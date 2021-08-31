@@ -105,7 +105,7 @@ export class EquipmentListingPageComponent extends Component {
       params,
       callSetInitialValues,
       onInitializeCardPaymentData,
-      orders
+      isFirstBooking
     } = this.props;
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
@@ -124,7 +124,7 @@ export class EquipmentListingPageComponent extends Component {
         ...bookingData,
         displayStart: bookingDisplayStart,
         displayEnd: bookingDisplayEnd,
-        isFirstBooking : orders.length===0,
+        isFirstBooking
       },
       bookingDates: {
         bookingStart: bookingStartDate.date,
@@ -215,7 +215,7 @@ export class EquipmentListingPageComponent extends Component {
       lineItems,
       fetchLineItemsInProgress,
       fetchLineItemsError,
-      orders,
+      isFirstBooking,
     } = this.props;
     const listingId = new UUID(rawParams.id);
     const isPendingApprovalVariant = rawParams.variant === LISTING_PAGE_PENDING_APPROVAL_VARIANT;
@@ -232,7 +232,6 @@ export class EquipmentListingPageComponent extends Component {
     const listingTab = isDraftVariant ? 'photos' : 'description';
     const isApproved =
       currentListing.id && currentListing.attributes.state !== LISTING_STATE_PENDING_APPROVAL;
-    const isFirstBooking = orders.length===0 
     const pendingIsApproved = isPendingApprovalVariant && isApproved;
 
     // If a /pending-approval URL is shared, the UI requires

@@ -39,9 +39,10 @@ export const SEND_ENQUIRY_REQUEST = 'app/EquipmentListingPage/SEND_ENQUIRY_REQUE
 export const SEND_ENQUIRY_SUCCESS = 'app/EquipmentListingPage/SEND_ENQUIRY_SUCCESS';
 export const SEND_ENQUIRY_ERROR = 'app/EquipmentListingPage/SEND_ENQUIRY_ERROR';
 
-export const FETCH_ORDERS_REQUEST = 'app/EquipmentListingPage/FETCH_ORDERS_REQUEST';
-export const FETCH_ORDERS_SUCCESS = 'app/EquipmentListingPage/FETCH_ORDERS_SUCCESS';
-export const FETCH_ORDERS_ERROR = 'app/EquipmentListingPage/FETCH_ORDERS_ERROR';
+export const CHECK_IS_FIRST_BOOKING_REQUEST = 'app/TransactionPage/CHECK_IS_FIRST_BOOKING_REQUEST';
+export const CHECK_IS_FIRST_BOOKING_SUCCESS = 'app/TransactionPage/CHECK_IS_FIRST_BOOKING_SUCCESS';
+export const CHECK_IS_FIRST_BOOKING_ERROR = 'app/TransactionPage/CHECK_IS_FIRST_BOOKING_ERROR';
+
 // ================ Reducer ================ //
 
 const initialState = {
@@ -59,7 +60,7 @@ const initialState = {
   enquiryModalOpenForListingId: null,
   fetchOrdersInProgress: false,
   fetchOrdersError: null,
-  orders: [],
+  isFirstBooking: false,
 };
 
 const entityRefs = entities =>
@@ -67,7 +68,6 @@ const entityRefs = entities =>
     id: entity.id,
     type: entity.type,
   }));
-
 
 const listingPageReducer = (state = initialState, action = {}) => {
   const { type, payload } = action;
@@ -107,12 +107,13 @@ const listingPageReducer = (state = initialState, action = {}) => {
       return { ...state, sendEnquiryInProgress: false };
     case SEND_ENQUIRY_ERROR:
       return { ...state, sendEnquiryInProgress: false, sendEnquiryError: payload };
-    case FETCH_ORDERS_REQUEST:
-      return { ...state, fetchOrdersInProgress: true, fetchOrdersError: null };
-    case FETCH_ORDERS_SUCCESS:
-      return { ...state, fetchOrdersInProgress: false, orders: entityRefs(payload.data.data) };
-    case FETCH_ORDERS_ERROR:
-      return { ...state, fetchOrdersInProgress: false, fetchOrdersError: payload };
+    case CHECK_IS_FIRST_BOOKING_REQUEST:
+      return { ...state };
+    case CHECK_IS_FIRST_BOOKING_SUCCESS:
+      const isFirstBooking = !(payload.data.data.length !== 0);
+      return { ...state, isFirstBooking };
+    case CHECK_IS_FIRST_BOOKING_ERROR:
+      return { ...state };
 
     default:
       return state;
@@ -173,17 +174,16 @@ export const sendEnquiryRequest = () => ({ type: SEND_ENQUIRY_REQUEST });
 export const sendEnquirySuccess = () => ({ type: SEND_ENQUIRY_SUCCESS });
 export const sendEnquiryError = e => ({ type: SEND_ENQUIRY_ERROR, error: true, payload: e });
 
-const fetchOrdersRequest = () => ({ type: FETCH_ORDERS_REQUEST });
-const fetchOrdersSuccess = response => ({
-  type: FETCH_ORDERS_SUCCESS,
+const checkIsFirstBookingRequest = () => ({ type: CHECK_IS_FIRST_BOOKING_REQUEST });
+const checkIsFirstBookingSuccess = response => ({
+  type: CHECK_IS_FIRST_BOOKING_SUCCESS,
   payload: response,
 });
-const fetchOrdersError = e => ({
-  type: FETCH_ORDERS_ERROR,
+const checkIsFirstBookingError = () => ({
+  type: CHECK_IS_FIRST_BOOKING_ERROR,
   error: true,
   payload: e,
 });
-
 // ================ Thunks ================ //
 
 export const showListing = (listingId, isOwn = false) => (dispatch, getState, sdk) => {
@@ -340,24 +340,21 @@ export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing
     });
 };
 
-export const fetchOrders = (params, search) => (dispatch, getState, sdk) => {
-  dispatch(fetchOrdersRequest());
+export const checkIsFirstBooking = () => (dispatch, getState, sdk) => {
+  dispatch(checkIsFirstBookingRequest());
   const apiQueryParams = {
-    only: "order",
-    lastTransitions: TRANSITIONS,
+    only: 'order',
     page: 1,
-    per_page: 2,
+    per_page: 1,
   };
-
   return sdk.transactions
     .query(apiQueryParams)
     .then(response => {
-      dispatch(addMarketplaceEntities(response));
-      dispatch(fetchOrdersSuccess(response));
+      dispatch(checkIsFirstBookingSuccess(response));
       return response;
     })
     .catch(e => {
-      dispatch(fetchOrdersError(storableError(e)));
+      dispatch(checkIsFirstBookingError(storableError(e)));
       throw e;
     });
 };
@@ -365,7 +362,7 @@ export const fetchOrders = (params, search) => (dispatch, getState, sdk) => {
 export const loadData = (params, search) => dispatch => {
   const listingId = new UUID(params.id);
 
-  dispatch(fetchOrders())
+  dispatch(checkIsFirstBooking());
   const ownListingVariants = [LISTING_PAGE_DRAFT_VARIANT, LISTING_PAGE_PENDING_APPROVAL_VARIANT];
   if (ownListingVariants.includes(params.variant)) {
     return dispatch(showListing(listingId, true));
